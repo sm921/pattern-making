@@ -1,0 +1,20 @@
+vulkano = "0.23.0"
+winit = "0.24"
+vulkano-shaders = "0.23.0"
+vulkano-win = "0.23.0"
+
+note: use latest versions!
+
+delete use Version
+
+delete first arg
+let instance = Instance::new(None, &required_extensions, None).unwrap();
+
+use appropriate winit version. MAY NOT BE LATEST!!
+let surface = WindowBuilder::new()
+.build_vk_surface(&event_loop, instance.clone())
+.unwrap();
+-> code jump to build_vk_surface and check what is the correct WindowBuilder version vulkano-win uses.
+
+
+Rust is really slow when it comes to compilation time
