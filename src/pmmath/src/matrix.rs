@@ -1,65 +1,7 @@
 use std::ops::{Add, Div, Index, IndexMut, Mul, Sub};
 use std::{cmp::min, usize};
 
-pub fn binomial(n: usize, k: usize) -> u32 {
-    let mut pascal_triangle: Vec<Vec<u32>> = vec![vec![1; n + 1]; n + 1];
-    for i in 0..n + 1 {
-        for j in 0..i + 1 {
-            pascal_triangle[i][j] = if j == 0 || j == i {
-                1
-            } else {
-                pascal_triangle[i - 1][j - 1] + pascal_triangle[i - 1][j]
-            };
-        }
-    }
-    pascal_triangle[n][k]
-}
-
-#[cfg(test)]
-mod test {
-    use crate::binomial;
-    #[test]
-    fn test_binomial() {
-        assert_eq!(binomial(3, 1), 3);
-        assert_eq!(binomial(1, 1), 1);
-        assert_eq!(binomial(3, 2), 3);
-        assert_eq!(binomial(5, 2), 10);
-        assert_eq!(binomial(8, 4), 70);
-        assert_eq!(binomial(4, 4), 1);
-        assert_eq!(binomial(7, 2), 21);
-    }
-}
-
-pub fn sigma<T>(a: T, from: usize, to: usize) -> f64
-where
-    T: Fn(usize) -> f64,
-{
-    let mut sum = 0.0;
-    for k in from..to {
-        sum = sum + a(k);
-    }
-    sum
-}
-
-#[cfg(test)]
-mod test_sigma {
-    use crate::sigma;
-    #[test]
-    fn test_sigma() {
-        assert_eq!(sigma(|k| k as f64, 1, 10), 45.0);
-        assert_eq!(sigma(|k| k as f64, 3, 5), 7.0);
-        assert_eq!(sigma(|k| 2.0 * k as f64, 1, 4), 12.0);
-    }
-}
-
-pub fn sigma_vec(a: fn(k: i32) -> (f64, f64), from: i32, to: i32) -> (f64, f64) {
-    let mut sum = (0.0, 0.0);
-    for k in from..to {
-        let ak = a(k);
-        sum = (sum.0 + ak.0, sum.1 + ak.1);
-    }
-    sum
-}
+use crate::sigma::sigma;
 
 #[derive(Debug, Clone)]
 pub struct NotInvertible;

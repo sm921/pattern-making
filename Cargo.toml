@@ -8,8 +8,10 @@ edition = "2018"
 members = [
     "src/pmrender",
     "src/pmmath",
+    "src/pmdraw",
 ]
 
 [dependencies]
 pmrender = {path = "src/pmrender"}
 pmmath = {path = "src/pmmath"}
+pmdraw = {path = "src/pmdraw"}
