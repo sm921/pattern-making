@@ -1,22 +1,6 @@
-use pmrender::show_lines;
+use pmdraw::drawing::Drawing;
 
 fn main() {
-    show_lines(
-        vec![
-            (0.0, 0.0),
-            (0.9, 0.0),
-            (0.0, 0.5),
-            (0.9, 0.5),
-            (0.0, 0.9),
-            (0.9, 0.9),
-        ],
-        [
-            [1.0, 0.0, 0.0, 0.0],  // 1. column
-            [0.0, 1.0, 0.0, 0.0],  // 2. column
-            [0.0, 0.0, 1.0, 0.0],  // 3. column
-            [-0.9, 0.0, 0.9, 1.0], // 4. column (left bottom is the origin)
-        ],
-        900,
-        900,
-    );
+    let drawing = Drawing::new();
+    drawing.show(900, 900, -3.0..3.0, -1.0..1.0);
 }

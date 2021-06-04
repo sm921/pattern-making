@@ -1,3 +1,4 @@
+/// from (inclusive), to (exclusive)
 pub fn sigma<T>(a: T, from: usize, to: usize) -> f64
 where
     T: Fn(usize) -> f64,
@@ -20,7 +21,11 @@ mod test_sigma {
     }
 }
 
-pub fn sigma_vec(a: fn(k: i32) -> (f64, f64), from: i32, to: i32) -> (f64, f64) {
+/// from (inclusive), to (exclusive)
+pub fn sigma_vec<T>(a: T, from: usize, to: usize) -> (f64, f64)
+where
+    T: Fn(usize) -> (f64, f64),
+{
     let mut sum = (0.0, 0.0);
     for k in from..to {
         let ak = a(k);

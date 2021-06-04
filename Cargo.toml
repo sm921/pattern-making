@@ -9,6 +9,7 @@ members = [
     "src/pmrender",
     "src/pmmath",
     "src/pmdraw",
+    "src/pmake",
 ]
 
 [dependencies]

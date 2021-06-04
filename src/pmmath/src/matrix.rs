@@ -204,7 +204,8 @@ impl Sub<Mat> for Mat {
 
 #[cfg(test)]
 mod test_matrix {
-    use crate::Mat;
+    use crate::matrix::Mat;
+
     #[test]
     fn test_matrix() {
         let mut identity = Mat::new(3, 3);
