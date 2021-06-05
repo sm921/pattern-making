@@ -181,7 +181,7 @@ impl Mul<Mat> for Mat {
             self.count_columns, mat.count_rows,
             "Number of columns of the left hand side matrix must be equal to Number of rows of the right hand side matrix."
         );
-        let mut new_mat = self.clone();
+        let mut new_mat = Mat::new(self.count_rows, mat.count_columns);
         new_mat.for_each(|new_mat, i, j| {
             new_mat[i][j] = sigma(|k| self[i][k] * mat[k][j], 0, self.count_columns)
         });

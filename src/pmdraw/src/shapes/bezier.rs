@@ -8,7 +8,7 @@ pub struct Bezier {
 
 impl Bezier {
     pub fn end(&self) -> Point {
-        self.points[self.points.len()]
+        self.points[self.points.len() - 1]
     }
 
     /// fit points
@@ -31,14 +31,14 @@ impl Bezier {
         let count_points = fit_points.len();
 
         // set origin and end
-        let mut points = Vec::with_capacity(count_points);
+        let mut points = vec![Point::new(0.0, 0.0); count_points];
         points[0] = fit_points[0];
         points[count_points - 1] = fit_points[count_points - 1];
 
         // set ctrl points
         let ctrl_points = solve_ctrl_points(fit_points, t);
-        for i in 1..count_points - 1 {
-            points[i] = ctrl_points[i];
+        for i in 0..count_points - 2 {
+            points[i + 1] = ctrl_points[i];
         }
         Bezier { points }
     }
@@ -65,7 +65,7 @@ impl Bezier {
 
 impl Clone for Bezier {
     fn clone(&self) -> Bezier {
-        let mut copy_points = Vec::with_capacity(self.points.len());
+        let mut copy_points = vec![Point::new(0.0, 0.0); self.points.len()];
         for i in 0..self.points.len() {
             copy_points[i] = self.points[i];
         }
@@ -144,9 +144,9 @@ fn solve_ctrl_points(points: Vec<Point>, t: Vec<f64>) -> Vec<Point> {
     let c = a.inverse().expect("Not invertible") * b;
 
     // convert to vector
-    let mut ctrl_points = Vec::with_capacity(c.count_rows);
-    for i in 0..c.count_rows {
-        ctrl_points[i] = Point::new(c[2 * i - 2][0], c[2 * i - 1][0]);
+    let mut ctrl_points = vec![Point::new(0.0, 0.0); n - 2];
+    for i in 0..n - 2 {
+        ctrl_points[i] = Point::new(c[2 * i][0], c[2 * i + 1][0]);
     }
     ctrl_points
 }

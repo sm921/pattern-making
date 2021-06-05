@@ -7,16 +7,35 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'pmrender'",
+            "name": "Debug unit tests in library 'pmake'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=pmrender"
+                    "--package=pmake"
                 ],
                 "filter": {
-                    "name": "pmrender",
+                    "name": "pmake",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmdraw'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmdraw"
+                ],
+                "filter": {
+                    "name": "pmdraw",
                     "kind": "lib"
                 }
             },
@@ -36,6 +55,44 @@
                 ],
                 "filter": {
                     "name": "pmmath",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmrender'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmrender"
+                ],
+                "filter": {
+                    "name": "pmrender",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmfile'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmfile"
+                ],
+                "filter": {
+                    "name": "pmfile",
                     "kind": "lib"
                 }
             },
