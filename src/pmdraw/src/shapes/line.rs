@@ -25,4 +25,10 @@ impl Line {
     pub fn point_from_origin(&self, length: f64) -> Point {
         self.origin.to_point(self.end, length)
     }
+
+    /// move line
+    pub fn to(&mut self, dx: f64, dy: f64) {
+        self.origin = self.origin.to(dx, dy, 0.0);
+        self.end = self.origin.to(dx, dy, 0.0);
+    }
 }

@@ -10,6 +10,7 @@ pub struct CoordinatesRange {
     pub z: Range<f64>,
 }
 
+#[derive(Clone)]
 pub struct Drawing {
     /// canvas width in centimeters
     pub width: f64,

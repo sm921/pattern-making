@@ -17,4 +17,8 @@ impl Circle {
         let theta = PI / 180.0 * angle_degree;
         self.origin + (self.r * Point::new(theta.cos(), theta.sin()))
     }
+
+    pub fn to(&mut self, dx: f64, dy: f64) {
+        self.origin = self.origin.to(dx, dy, 0.0);
+    }
 }

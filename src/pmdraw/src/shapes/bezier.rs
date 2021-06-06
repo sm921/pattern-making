@@ -43,6 +43,10 @@ impl Bezier {
         Bezier { points }
     }
 
+    pub fn origin(&self) -> Point {
+        self.points[0]
+    }
+
     pub fn point_at(&self, t: f64) -> Point {
         // number of points
         let n = self.points.len();
@@ -58,8 +62,10 @@ impl Bezier {
         )
     }
 
-    pub fn origin(&self) -> Point {
-        self.points[0]
+    pub fn to(&mut self, dx: f64, dy: f64) {
+        for i in 0..self.points.len() {
+            self.points[i] = self.points[i].to(dx, dy, 0.0);
+        }
     }
 }
 

@@ -5,7 +5,7 @@ use pmdraw::{
 use pmfile::create_pdf;
 
 fn main() {
-    let mut drawing = Drawing::new(7.0, 100.0);
+    let mut drawing = Drawing::new(70.0, 60.0);
     drawing.draw_line(0.0, 0.0, 30.0, 55.0);
     let p0 = Point::new(40.0, 50.0);
     let p1 = Point::new(24.0, 32.0);
@@ -16,11 +16,12 @@ fn main() {
     let c1 = Point::new(20.0, 40.0);
     let c2 = Point::new(40.0, 12.0);
     let end = Point::new(60.0, 24.0);
-    drawing.draw_bezier(Bezier::new(vec![o, c1, /*c2,*/ end]), 100);
+    drawing.draw_bezier(Bezier::new(vec![o, c1, c2, end]), 100);
     drawing.draw_point(o);
     drawing.draw_point(c1);
     drawing.draw_point(c2);
     drawing.draw_point(end);
-    create_pdf(drawing);
     // drawing.show(900, 900);
+
+    create_pdf(drawing);
 }
