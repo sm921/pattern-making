@@ -21,18 +21,26 @@
 in order of priority
 
 - [x] render vertices
-- [] change units in centimeter
-- [] draw lines
-- [] draw circles
-- [] export as dxf ([samples](dxf))
-- [] draw spline
-- [] draw bezier curves
+- [x] change units in centimeter
+- [x] draw lines
+- [x] draw circles
+
+  ~~export as dxf ([sample](dxf))~~ **in favor of use of printers with real sized PDF, but may be implemented in future to use drawings with laser cutters**
+
+- [x] export as pdf ([sample](drawing.pdf))
+
+  ~~draw spline~~ **in favor of ARBITRARY DIMENSIONS bezier curve dependent on FIT POINTS, not ctrl points**
+
+- [x] draw bezier curves
 - [] create base pattern
 - [] create black shirts
 - [] create gray jeans
 - [] create black round tyrolean
-- [] zoom
-- [] pan
+
+  ~~zoom~~ lack of time and low priority
+
+  ~~pan~~ lack of time and low priority
+
 - [] documentation
 
 ## Disclaimer
