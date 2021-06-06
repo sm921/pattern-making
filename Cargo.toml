@@ -6,13 +6,15 @@ edition = "2018"
 
 [workspace]
 members = [
-    "src/pmrender",
-    "src/pmmath",
-    "src/pmdraw",
     "src/pmake",
+    "src/pmdraw",
+    "src/pmfile",
+    "src/pmmath",
+    "src/pmrender",
 ]
 
 [dependencies]
-pmrender = {path = "src/pmrender"}
-pmmath = {path = "src/pmmath"}
 pmdraw = {path = "src/pmdraw"}
+pmfile = {path = "src/pmfile"}
+pmmath = {path = "src/pmmath"}
+pmrender = {path = "src/pmrender"}

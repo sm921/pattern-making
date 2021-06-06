@@ -4,8 +4,8 @@ use super::point::Point;
 
 #[derive(Copy, Clone)]
 pub struct Circle {
-    origin: Point,
-    r: f64,
+    pub origin: Point,
+    pub r: f64,
 }
 
 impl Circle {

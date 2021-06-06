@@ -5,8 +5,7 @@ use pmdraw::{
 use pmfile::create_pdf;
 
 fn main() {
-    create_pdf();
-    let mut drawing = Drawing::new();
+    let mut drawing = Drawing::new(7.0, 100.0);
     drawing.draw_line(0.0, 0.0, 30.0, 55.0);
     let p0 = Point::new(40.0, 50.0);
     let p1 = Point::new(24.0, 32.0);
@@ -22,5 +21,6 @@ fn main() {
     drawing.draw_point(c1);
     drawing.draw_point(c2);
     drawing.draw_point(end);
-    drawing.show(900, 900, 0.0..70.0, 0.0..100.0);
+    create_pdf(drawing);
+    // drawing.show(900, 900);
 }

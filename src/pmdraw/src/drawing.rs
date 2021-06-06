@@ -11,15 +11,24 @@ pub struct CoordinatesRange {
 }
 
 pub struct Drawing {
-    shapes: Vec<Shape>,
+    /// canvas width in centimeters
+    pub width: f64,
+    /// canvas height in centimeters
+    pub height: f64,
+    pub shapes: Vec<Shape>,
     vertices: Vec<(f32, f32)>,
 }
 
 impl Drawing {
-    pub fn new() -> Drawing {
+    pub fn new(width: f64, height: f64) -> Drawing {
         let shapes = Vec::new();
         let vertices = Vec::new();
-        Drawing { shapes, vertices }
+        Drawing {
+            width,
+            height,
+            shapes,
+            vertices,
+        }
     }
 
     pub fn draw_bezier(&mut self, b: Bezier, precision: u32) {
@@ -88,17 +97,14 @@ impl Drawing {
         self.draw_circle_with_precision(p, 1.0, 20);
     }
 
-    pub fn show(
-        &self,
-        width: u32,
-        height: u32,
-        coordinate_range_x: Range<f32>,
-        coordinate_range_y: Range<f32>,
-    ) {
-        let len_x = coordinate_range_x.end - coordinate_range_x.start;
-        let len_y = coordinate_range_y.end - coordinate_range_y.start;
+    pub fn show(&self, window_width: u32, window_height: u32) {
         // normalize coordinates
-        let scale = 2.0 / (if len_x > len_y { len_x } else { len_y });
+        let scale = 2.0
+            / (if self.width > self.height {
+                self.width
+            } else {
+                self.height
+            });
         let model = [
             [scale, 0.0, 0.0, 0.0],  // 1. column: normalize x coodinates
             [0.0, -scale, 0.0, 0.0], // 2. column: normalize and reverse y coodinates so that upperside is positive
@@ -106,6 +112,6 @@ impl Drawing {
             [-0.9, 0.9, 0.0, 1.0],   // 4. column: move origin to the left bottom
         ];
 
-        show_lines(self.vertices.to_vec(), model, width, height);
+        // show_lines(self.vertices.to_vec(), model, window_width, window_height);
     }
 }
