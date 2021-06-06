@@ -2,7 +2,7 @@ use pmdraw::{
     drawing::Drawing,
     shapes::{bezier::Bezier, line::Line, point::Point},
 };
-use pmfile::create_pdf;
+use pmfile::pdf::pdf;
 
 fn main() {
     let mut drawing = Drawing::new(70.0, 60.0);
@@ -22,6 +22,5 @@ fn main() {
     drawing.draw_point(c2);
     drawing.draw_point(end);
     // drawing.show(900, 900);
-
-    create_pdf(drawing);
+    pdf(&drawing);
 }
