@@ -81,7 +81,7 @@ fn draw_bezier(pdf: &mut String, b: Bezier, offset_x: f32, offset_y: f32) {
 }
 
 fn draw_circle(pdf: &mut String, c: Circle, offset_x: f32, offset_y: f32) {
-    let origin = to_pt_point(c.origin).to(-offset_x as f64, -offset_y as f64, 0.0);
+    let origin = to_pt_point(c.origin).to(-offset_x as f64, -offset_y as f64);
     let get_point =
         |theta: f64| origin + (to_pt(c.r) as f64 * Point::new(theta.cos(), theta.sin()));
     let mut theta: f64 = 0.0;
@@ -100,8 +100,8 @@ fn draw_circle(pdf: &mut String, c: Circle, offset_x: f32, offset_y: f32) {
 }
 
 fn draw_line(pdf: &mut String, mut l: Line, offset_x: f32, offset_y: f32) {
-    l.origin = to_pt_point(l.origin).to(-offset_x as f64, -offset_y as f64, 0.0);
-    l.end = to_pt_point(l.end).to(-offset_x as f64, -offset_y as f64, 0.0);
+    l.origin = to_pt_point(l.origin).to(-offset_x as f64, -offset_y as f64);
+    l.end = to_pt_point(l.end).to(-offset_x as f64, -offset_y as f64);
     pdf.push_str(&format!(
         "{} {} m {} {} l ",
         l.origin.x as f32, l.origin.y as f32, l.end.x as f32, l.end.y as f32
@@ -109,7 +109,7 @@ fn draw_line(pdf: &mut String, mut l: Line, offset_x: f32, offset_y: f32) {
 }
 
 fn draw_point(pdf: &mut String, p: Point, offset_x: f32, offset_y: f32) {
-    let p = to_pt_point(p).to(-offset_x as f64, -offset_y as f64, 0.0);
+    let p = to_pt_point(p).to(-offset_x as f64, -offset_y as f64);
     draw_circle(pdf, Circle::new(p, 1.0), offset_x, offset_x);
 }
 

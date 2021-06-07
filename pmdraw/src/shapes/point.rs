@@ -38,7 +38,7 @@ impl Point {
 
     /// Get a new point whose norm is 1
     pub fn normalize(&self) -> Point {
-        Point::new3(self.x, self.y, self.z)
+        Point::new3(self.x, self.y, self.z) / self.norm()
     }
 
     /// Rotate around z axis
@@ -74,14 +74,17 @@ impl Point {
     }
 
     /// Create a new point relative to this point
-    pub fn to(&self, dx: f64, dy: f64, dz: f64) -> Point {
+    pub fn to(&self, dx: f64, dy: f64) -> Point {
+        Point::new3(self.x + dx, self.y + dy, self.z)
+    }
+    pub fn to3(&self, dx: f64, dy: f64, dz: f64) -> Point {
         Point::new3(self.x + dx, self.y + dy, self.z + dz)
     }
 
     /// Create a new point relative to this point towards another point
     pub fn to_point(&self, towards: Point, length: f64) -> Point {
-        let d = (self - towards).normalize() * length;
-        self.to(d.x, d.y, d.z)
+        let d = (towards - self).normalize() * length;
+        self.to(d.x, d.y)
     }
 
     /// Create a new point relative to this point in angular coodinates

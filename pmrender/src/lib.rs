@@ -127,11 +127,6 @@ pub fn show_lines(vertices: Vec<(f32, f32)>, model: [[f32; 4]; 4], width: u32, h
 
 				layout(location = 0) in vec2 position;
 				layout(location = 1) in mat4 model;
-                // mat4 M = mat4(1.0, 0.0, 0.0, 0.0,  // 1. column
-                //               0.0, 1.0, 0.0, 0.0,  // 2. column
-                //               0.0, 0.0, 1.0, 0.0,  // 3. column
-                //               -0.9, 0.0, 0.9, 1.0); // 4. column (left bottom is the origin)
-                // mat4 M = mat4(1.0);
 
 				void main() {
 					gl_Position = model * vec4(position, 0.0, 1.0);
@@ -149,7 +144,7 @@ pub fn show_lines(vertices: Vec<(f32, f32)>, model: [[f32; 4]; 4], width: u32, h
 				layout(location = 0) out vec4 f_color;
 
 				void main() {
-					f_color = vec4(0.85, 0.95, 0.1, 1.0);
+					f_color = vec4(0.19, 0.57, 0.95, 1.0);
 				}
 			"
         }
@@ -274,7 +269,7 @@ pub fn show_lines(vertices: Vec<(f32, f32)>, model: [[f32; 4]; 4], width: u32, h
                     recreate_swapchain = true;
                 }
 
-                let clear_values = vec![[0.1, 0.2, 0.3, 1.0].into()];
+                let clear_values = vec![[0.0001, 0.00015, 0.005, 1.0].into()];
 
                 // In order to draw, we have to build a *command buffer*. The command buffer object holds
                 // the list of commands that are going to be executed.

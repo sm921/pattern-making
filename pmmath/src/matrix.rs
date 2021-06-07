@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Index, IndexMut, Mul, Sub};
+use std::ops::{self, Index, IndexMut};
 use std::{cmp::min, usize};
 
 use crate::sigma::sigma;
@@ -123,83 +123,50 @@ impl Index<usize> for Mat {
         &self.row_vecs[i]
     }
 }
-
 impl IndexMut<usize> for Mat {
     fn index_mut<'a>(&'a mut self, i: usize) -> &'a mut Vec<f64> {
         &mut self.row_vecs[i]
     }
 }
+impl_op_ex!(+|a: &Mat, b: &Mat| -> Mat {
+    assert_eq_matrix_size(a, b);
+    let mut new_mat = a.clone();
+    new_mat.for_each(|new_mat, i, j| new_mat[i][j] += b[i][j]);
+    new_mat
+});
+impl_op_ex!(-|a: &Mat, b: &Mat| -> Mat {
+    assert_eq_matrix_size(a, b);
+    let mut new_mat = a.clone();
+    new_mat.for_each(|new_mat, i, j| new_mat[i][j] -= b[i][j]);
+    new_mat
+});
+impl_op_ex!(*|a: &Mat, b: f64| -> Mat {
+    let mut new_mat = a.clone();
+    new_mat.for_each(|new_mat, i, j| new_mat[i][j] *= b);
+    new_mat
+});
+impl_op_ex!(*|a: &Mat, b: &Mat| -> Mat {
+    assert_eq!(a.count_columns, b.count_rows);
+    let mut new_mat = Mat::new(a.count_rows, b.count_columns);
+    new_mat
+        .for_each(|new_mat, i, j| new_mat[i][j] = sigma(|k| a[i][k] * b[k][j], 0, a.count_columns));
+    new_mat
+});
+impl_op_ex!(/|a: &Mat, b: f64| -> Mat {
+    let mut new_mat = a.clone();
+    new_mat.for_each(|new_mat, i, j| new_mat[i][j] /= b);
+    new_mat
+});
 
-impl Add<Mat> for Mat {
-    type Output = Mat;
-    fn add(self, mat: Mat) -> Mat {
-        let mut new_mat = self.clone();
-        for i in 0..min(self.count_rows, mat.count_rows) {
-            for j in 0..min(self.count_columns, self.count_columns) {
-                new_mat[i][j] = self[i][j] + mat[i][j];
-            }
-        }
-        new_mat
-    }
-}
-
-impl Div<f64> for Mat {
-    type Output = Mat;
-    fn div(self, scalar: f64) -> Mat {
-        let mut new_mat = self.clone();
-        new_mat.for_each(|new_mat, i, j| new_mat[i][j] = self[i][j] / scalar);
-        new_mat
-    }
-}
-
-impl PartialEq for Mat {
-    fn eq(&self, another: &Self) -> bool {
-        for i in 0..self.count_rows {
-            for j in 0..self.count_columns {
-                if self[i][j] != another[i][j] {
-                    return false;
-                }
-            }
-        }
-        true
-    }
-}
-
-impl Mul<f64> for Mat {
-    type Output = Mat;
-    fn mul(self, scalar: f64) -> Mat {
-        let mut new_mat = self.clone();
-        new_mat.for_each(|new_mat, i, j| new_mat[i][j] = self[i][j] * scalar);
-        new_mat
-    }
-}
-
-impl Mul<Mat> for Mat {
-    type Output = Mat;
-    fn mul(self, mat: Mat) -> Mat {
-        assert_eq!(
-            self.count_columns, mat.count_rows,
-            "Number of columns of the left hand side matrix must be equal to Number of rows of the right hand side matrix."
-        );
-        let mut new_mat = Mat::new(self.count_rows, mat.count_columns);
-        new_mat.for_each(|new_mat, i, j| {
-            new_mat[i][j] = sigma(|k| self[i][k] * mat[k][j], 0, self.count_columns)
-        });
-        new_mat
-    }
-}
-
-impl Sub<Mat> for Mat {
-    type Output = Mat;
-    fn sub(self, mat: Mat) -> Mat {
-        let mut new_mat = self.clone();
-        for i in 0..min(self.count_rows, mat.count_rows) {
-            for j in 0..min(self.count_columns, self.count_columns) {
-                new_mat[i][j] = self[i][j] - mat[i][j];
-            }
-        }
-        new_mat
-    }
+fn assert_eq_matrix_size(a: &Mat, b: &Mat) {
+    assert_eq!(
+        a.count_columns, b.count_columns,
+        "Size of two matrices must be the same"
+    );
+    assert_eq!(
+        a.count_rows, b.count_rows,
+        "Size of twio matrices must be the same"
+    );
 }
 
 #[cfg(test)]

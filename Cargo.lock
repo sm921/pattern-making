@@ -60,6 +60,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "clothes"
+version = "0.1.0"
+dependencies = [
+ "pmdraw",
+]
+
+[[package]]
 name = "cmake"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -697,9 +704,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "pattern-making"
+name = "pattern_making"
 version = "0.1.0"
 dependencies = [
+ "clothes",
  "pmdraw",
  "pmfile",
  "pmmath",
@@ -717,10 +725,6 @@ name = "pkg-config"
 version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
-
-[[package]]
-name = "pmake"
-version = "0.1.0"
 
 [[package]]
 name = "pmdraw"
@@ -741,6 +745,9 @@ dependencies = [
 [[package]]
 name = "pmmath"
 version = "0.1.0"
+dependencies = [
+ "impl_ops",
+]
 
 [[package]]
 name = "pmrender"

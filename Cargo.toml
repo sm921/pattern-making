@@ -1,12 +1,12 @@
 [package]
-name = "pattern-making"
+name = "pattern_making"
 version = "0.1.0"
 authors = ["sm921 <seimei.221.921@gmail.com>"]
 edition = "2018"
 
 [workspace]
 members = [
-    "pmake",
+    "clothes",
     "pmdraw",
     "pmfile",
     "pmmath",
@@ -18,3 +18,4 @@ pmdraw = {path = "pmdraw"}
 pmfile = {path = "pmfile"}
 pmmath = {path = "pmmath"}
 pmrender = {path = "pmrender"}
+clothes = {path = "clothes"}

@@ -19,6 +19,6 @@ impl Circle {
     }
 
     pub fn to(&mut self, dx: f64, dy: f64) {
-        self.origin = self.origin.to(dx, dy, 0.0);
+        self.origin = self.origin.to(dx, dy);
     }
 }

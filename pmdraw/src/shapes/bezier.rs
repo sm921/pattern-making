@@ -64,7 +64,7 @@ impl Bezier {
 
     pub fn to(&mut self, dx: f64, dy: f64) {
         for i in 0..self.points.len() {
-            self.points[i] = self.points[i].to(dx, dy, 0.0);
+            self.points[i] = self.points[i].to(dx, dy);
         }
     }
 }

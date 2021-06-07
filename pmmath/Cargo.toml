@@ -3,3 +3,6 @@ name = "pmmath"
 version = "0.1.0"
 authors = ["sm921 <seimei.221.921@gmail.com>"]
 edition = "2018"
+
+[dependencies]
+impl_ops = "0.1.1"
