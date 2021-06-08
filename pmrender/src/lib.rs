@@ -39,6 +39,7 @@ use winit::window::{Window, WindowBuilder};
 ///     (0.15, -0.9), // line3's end
 /// ]);
 /// ```
+#[cfg(not(target_arch = "wasm32"))]
 pub fn show_lines(vertices: Vec<(f32, f32)>, model: [[f32; 4]; 4], width: u32, height: u32) {
     let required_extensions = vulkano_win::required_extensions();
     let instance = Instance::new(None, &required_extensions, None).unwrap();
@@ -349,7 +350,6 @@ fn window_size_dependent_setup(
     dynamic_state: &mut DynamicState,
 ) -> Vec<Arc<dyn FramebufferAbstract + Send + Sync>> {
     let dimensions = images[0].dimensions();
-
     let viewport = Viewport {
         origin: [0.0, 0.0],
         dimensions: [dimensions[0] as f32, dimensions[1] as f32],

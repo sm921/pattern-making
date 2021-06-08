@@ -16,9 +16,14 @@
 - save drawings as dxf files (Drawing Exchange Format. the most common file format for CAD applications)
 - matrix and vector calculations
 
-## Progress and Goals
+## Pros
 
-in order of priority
+Using WebAssembly, the program runs on the both of browser and desktop
+
+- run `cargo run --example main` to start on desktop
+- run `cd clothes && wasm-pack build --target web` to build for browser
+
+## Roadmap
 
 - [x] render vertices
 - [x] change units in centimeter

@@ -36,6 +36,6 @@ fn main() {
         15.0,
     );
     base.draw(900, 900);
-    // drawing.show(900, 900);
+    drawing.show(900, 900);
     pdf(&drawing);
 }

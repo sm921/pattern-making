@@ -1,14 +1,9 @@
-use std::{f64::consts::PI, ops::Range};
+use std::f64::consts::PI;
 
+#[cfg(not(target_arch = "wasm32"))]
 use pmrender::show_lines;
 
 use crate::shapes::{bezier::Bezier, circle::Circle, line::Line, point::Point, Shape};
-
-pub struct CoordinatesRange {
-    pub x: Range<f64>,
-    pub y: Range<f64>,
-    pub z: Range<f64>,
-}
 
 #[derive(Clone)]
 pub struct Drawing {
@@ -101,7 +96,7 @@ impl Drawing {
         self.circle_with_precision(p, 0.3, 20);
     }
 
-    pub fn show(&self, window_width: u32, window_height: u32) {
+    pub fn show(&self, _window_width: u32, _window_height: u32) {
         // normalize coordinates
         let scale = 2.0
             / (if self.width as f32 > self.height as f32 {
@@ -109,13 +104,23 @@ impl Drawing {
             } else {
                 self.height as f32
             });
-        let model: [[f32; 4]; 4] = [
+        let _model: [[f32; 4]; 4] = [
             [scale, 0.0, 0.0, 0.0],  // 1. column: normalize x coodinates
             [0.0, -scale, 0.0, 0.0], // 2. column: normalize and reverse y coodinates so that upperside is positive
             [0.0, 0.0, scale, 0.0],  // 3. column: normalize z coodinates
             [-0.9, 0.9, 0.0, 1.0],   // 4. column: move origin to the left bottom
         ];
 
-        show_lines(self.vertices.to_vec(), model, window_width, window_height);
+        if cfg!(wasm32) {
+            todo!()
+        } else {
+            #[cfg(not(target_arch = "wasm32"))]
+            show_lines(
+                self.vertices.to_vec(),
+                _model,
+                _window_width,
+                _window_height,
+            )
+        };
     }
 }

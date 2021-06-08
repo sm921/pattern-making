@@ -6,7 +6,6 @@ use pmdraw::{
 };
 
 use super::measurements::{Cm, Measurements};
-
 pub struct Base {
     center_back_line: Line,
     center_front_line: Line,
@@ -40,11 +39,12 @@ impl Base {
         for bezier in vec![&self.front_arm_hole, &self.front_neck] {
             draw.bezier(&bezier)
         }
+        draw.line(Line::new(Point::new(10.0, 10.0), Point::new(30.0, 50.0)));
         draw.show(window_width, window_height);
     }
 
     /// parameters are measurements of body and amount of dart
-    pub fn new(m: Measurements<Cm>, dart: Cm) -> Base {
+    pub fn new(m: Measurements, dart: Cm) -> Base {
         Base::assert_measurements(&m);
         let drawing_width = m.waist / 2.0 + 2.0 + dart + DRAWING_MARGIN;
         let drawing_height = if m.hps_to_waist > m.nape_to_waist {
@@ -126,7 +126,7 @@ impl Base {
         }
     }
 
-    fn assert_measurements(m: &Measurements<Cm>) {
+    fn assert_measurements(m: &Measurements) {
         assert_ne!(m.waist, 0.0, "waist must be positive");
         assert_ne!(m.hps_to_waist, 0.0, "hps_to_waist must be positive");
         assert_ne!(m.nape_to_waist, 0.0, "nape_to_waist must be positive");

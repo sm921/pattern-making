@@ -7,4 +7,6 @@ edition = "2018"
 [dependencies]
 impl_ops = "0.1.1"
 pmmath = {path = "../pmmath" }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 pmrender = {path = "../pmrender" }
