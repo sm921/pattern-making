@@ -740,6 +740,7 @@ dependencies = [
  "impl_ops",
  "pmmath",
  "pmrender",
+ "wasm-bindgen",
 ]
 
 [[package]]

@@ -31,11 +31,12 @@ fn main() {
             neck_size: 27.0,
             shoulder: 13.0,
             x_front: 27.0,
+            x_back: 28.0,
             ..Default::default()
         },
         15.0,
     );
     base.draw(900, 900);
-    drawing.show(900, 900);
-    pdf(&drawing);
+    // drawing.show(900, 900);
+    // pdf(&drawing);
 }

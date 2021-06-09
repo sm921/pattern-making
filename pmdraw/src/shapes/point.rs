@@ -1,19 +1,24 @@
 use std::ops;
 
 use std::f64::consts::PI;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Copy, Clone)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
     pub z: f64,
 }
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub enum Axis {
     X,
     Y,
     Z,
 }
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Point {
     pub fn between(&self, another: Point, t: f64) -> Point {
         (1.0 - t) * self.clone() + t * another

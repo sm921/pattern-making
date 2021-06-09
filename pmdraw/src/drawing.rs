@@ -16,17 +16,6 @@ pub struct Drawing {
 }
 
 impl Drawing {
-    pub fn new(width: f64, height: f64) -> Drawing {
-        let shapes = Vec::new();
-        let vertices = Vec::new();
-        Drawing {
-            width,
-            height,
-            shapes,
-            vertices,
-        }
-    }
-
     pub fn bezier(&mut self, b: &Bezier) {
         self.bezier_with_precision(b, 100)
     }
@@ -89,6 +78,17 @@ impl Drawing {
         }
         self.vertices.push((l.origin.x as f32, l.origin.y as f32));
         self.vertices.push((l.end.x as f32, l.end.y as f32));
+    }
+
+    pub fn new(width: f64, height: f64) -> Drawing {
+        let shapes = Vec::new();
+        let vertices = Vec::new();
+        Drawing {
+            width,
+            height,
+            shapes,
+            vertices,
+        }
     }
 
     pub fn point(&mut self, p: Point) {
