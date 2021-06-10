@@ -5,11 +5,24 @@ use pmdraw::{
     shapes::{bezier::Bezier, circle::Circle, line::Line, point::Point, Shape},
 };
 
+// width in pdf point
 const A3_WIDTH: f32 = 842.0;
+// height in pdf point
 const A3_HEIGHT: f32 = 1190.0;
 const PRECISION: u32 = 100;
 
-pub fn pdf(drawing: &Drawing) -> String {
+/// Create PDF file
+/// - paper_width - width of document in millimeter
+/// - paper_width - width of document in millimeter
+pub fn pdf(drawing: &Drawing, paper_width: Option<f64>, paper_height: Option<f64>) -> String {
+    let paper_width = match paper_width {
+        Some(custom_width) => to_pt(custom_width / 10.0),
+        None => A3_WIDTH,
+    };
+    let paper_height = match paper_height {
+        Some(custom_height) => to_pt(custom_height / 10.0),
+        None => A3_HEIGHT,
+    };
     let mut out = String::from(
         "%PDF-1.7
 %µí®û
@@ -27,11 +40,11 @@ pub fn pdf(drawing: &Drawing) -> String {
     // traverse vertically
     let mut i = 0.0;
     loop {
-        let offset_y = i * A3_HEIGHT;
+        let offset_y = i * paper_height;
         // traverse horizontally
         let mut j = 0.0;
         loop {
-            let offset_x = j * A3_WIDTH;
+            let offset_x = j * paper_width;
             // store id of not start but end of stream
             page_id_list.push(page_id + 2);
             let positions = write_stream(
@@ -40,18 +53,20 @@ pub fn pdf(drawing: &Drawing) -> String {
                 page_id,
                 offset_x,
                 offset_y,
+                paper_width,
+                paper_height,
             );
             for position in positions {
                 object_positions.push(position)
             }
             // stream contains 2 objects, thus next id is added by 3
             page_id += 3;
-            if offset_x + A3_WIDTH > width {
+            if offset_x + paper_width > width {
                 break;
             }
             j += 1.0;
         }
-        if offset_y + A3_HEIGHT > height {
+        if offset_y + paper_height > height {
             break;
         }
         i += 1.0;
@@ -66,14 +81,15 @@ pub fn pdf(drawing: &Drawing) -> String {
 }
 
 fn draw_bezier(pdf: &mut String, b: Bezier, offset_x: f32, offset_y: f32) {
-    let mut t = 0.0;
-    let dt = 1.0 / PRECISION as f64;
-    while t <= 1.0 {
+    let t_range = b.t_range();
+    let mut t = t_range.0;
+    let dt = t_range.1 / PRECISION as f64;
+    while t <= t_range.1 {
         let p1 = b.point_at(t);
-        let p2 = if t + dt < 1.0 {
+        let p2 = if t + dt < t_range.1 {
             b.point_at(t + dt)
         } else {
-            b.end()
+            b.point_at(t_range.1)
         };
         draw_line(pdf, Line::new(p1, p2), offset_x, offset_y);
         t += dt;
@@ -150,6 +166,8 @@ fn write_stream(
     page_index: usize,
     offset_x: f32,
     offset_y: f32,
+    paper_width: f32,
+    paper_height: f32,
 ) -> Vec<usize> {
     // begin
     pdf.push_str(&format!(
@@ -198,8 +216,8 @@ endobj
         id2 = page_index + 1,
         content_length = content_length,
         id3 = page_index + 2,
-        width = A3_WIDTH as u32,
-        height = A3_HEIGHT as u32,
+        width = paper_width,
+        height = paper_height,
         id1 = page_index
     ));
     object_positions

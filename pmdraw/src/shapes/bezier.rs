@@ -1,12 +1,21 @@
+#![macro_use]
 use pmmath::{binomial::binomial, matrix::Mat};
 
 use super::point::{sigma, Point};
 
+/// A general bezier of n points
 pub struct Bezier {
     points: Vec<Point>,
+    /// [Optional] - set range (from, to) to represent patial bezier curve
+    range: (Point, Point),
 }
 
 impl Bezier {
+    /// derivative dB/dt = (dx/dt, dy/dt)
+    fn derivative(&self, t: f64) -> Point {
+        (self.point_at(t + 0.001) - self.point_at(t)) / 0.001
+    }
+
     pub fn end(&self) -> Point {
         self.points[self.points.len() - 1]
     }
@@ -32,21 +41,29 @@ impl Bezier {
 
         // set origin and end
         let mut points = vec![Point::new(0.0, 0.0); count_points];
-        points[0] = fit_points[0];
-        points[count_points - 1] = fit_points[count_points - 1];
+        let origin = fit_points[0];
+        let end = fit_points[count_points - 1];
+        points[0] = origin;
+        points[count_points - 1] = end;
 
         // set ctrl points
         let ctrl_points = solve_ctrl_points(fit_points, t);
         for i in 0..count_points - 2 {
             points[i + 1] = ctrl_points[i];
         }
-        Bezier { points }
+        Bezier {
+            points,
+            range: (origin, end),
+        }
     }
 
     pub fn origin(&self) -> Point {
         self.points[0]
     }
 
+    /// A general bezier of n points (P0, P1, ..., Pk) is definde as
+    ///  B(t) = Sigma[ n-1Ck * (1-t)^(n-1-k) * t^k * Pk ]
+    ///   where 0 <= t <= 1
     pub fn point_at(&self, t: f64) -> Point {
         // number of points
         let n = self.points.len();
@@ -60,6 +77,48 @@ impl Bezier {
             0,
             n,
         )
+    }
+
+    pub fn set_range(&mut self, from: Point, to: Point) {
+        self.range = (from, to);
+    }
+
+    /// Solve parameter t of point p when p is somewhere on the curve by Newton's method
+    fn solve_t_at(&self, p: Point) -> f64 {
+        let tolerance = 0.1;
+        let (mut learning_rate_x, mut learning_rate_y) = (1.0, 1.0);
+        // initial guess
+        let mut t = 0.5;
+        loop {
+            // derivative at guess t
+            let db_dt = self.derivative(t);
+            // update t by Newton's method
+            let p0 = self.point_at(t);
+            let t1 = t
+                + learning_rate_y * (p.y - p0.y) / db_dt.y
+                + learning_rate_x * (p.x - p0.x) / db_dt.x;
+            // validate new t
+            let p1 = self.point_at(t1);
+            let dif = p - p1;
+            if dif.x.abs() < tolerance && dif.y.abs() < tolerance {
+                return t1;
+            }
+            // if t is not precise enough, repeat the process against updated t
+            t = t1;
+            // modify learning rate to prevent surturation and divergence
+            // learn more if difference is large
+            learning_rate_x = dif.x.abs() / (dif.x.abs() + dif.y.abs());
+            learning_rate_y = dif.y.abs() / (dif.x.abs() + dif.y.abs());
+        }
+    }
+
+    /// Get range of t (0 to 1 by default)
+    pub fn t_range(&self) -> (f64, f64) {
+        let (from, to) = self.range;
+        if from == self.origin() && to == self.end() {
+            return (0.0, 1.0);
+        }
+        (self.solve_t_at(self.range.0), self.solve_t_at(self.range.1))
     }
 
     pub fn to(&mut self, dx: f64, dy: f64) {
@@ -77,6 +136,7 @@ impl Clone for Bezier {
         }
         Bezier {
             points: copy_points,
+            range: self.range,
         }
     }
 }

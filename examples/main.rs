@@ -36,7 +36,7 @@ fn main() {
         },
         15.0,
     );
-    base.draw(900, 900);
+    let base_draw = base.draw(900, 900);
     // drawing.show(900, 900);
-    // pdf(&drawing);
+    pdf(&base_draw, Some(560.0), Some(690.0));
 }

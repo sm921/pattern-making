@@ -42,6 +42,15 @@ impl Line {
         self.origin.to_point(self.end, length)
     }
 
+    /// Split the line at a point and get two separate lines
+    pub fn split_at_x(&self, x: f64) -> (Line, Line) {
+        let split_point = self.at_x(x);
+        (
+            Line::new(self.origin, split_point),
+            Line::new(split_point, self.end),
+        )
+    }
+
     /// move line
     pub fn to(&mut self, dx: f64, dy: f64) {
         self.origin = self.origin.to(dx, dy);

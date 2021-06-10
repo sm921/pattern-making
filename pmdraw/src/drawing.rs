@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
-#[cfg(not(target_arch = "wasm32"))]
-use pmrender::show_lines;
+// #[cfg(not(target_arch = "wasm32"))]
+// use pmrender::show_lines;
 
 use crate::shapes::{bezier::Bezier, circle::Circle, line::Line, point::Point, Shape};
 
@@ -21,15 +21,16 @@ impl Drawing {
     }
     pub fn bezier_with_precision(&mut self, b: &Bezier, precision: u32) {
         self.shapes.push(Shape::Bezier(b.clone()));
-        let mut t = 0.0;
-        let dt = 1.0 / precision as f64;
-        while t <= 1.0 {
+        let t_range = b.t_range();
+        let mut t = t_range.0;
+        let dt = t_range.1 / precision as f64;
+        while t <= t_range.1 {
             self.line_no_store(Line::new(
                 b.point_at(t),
-                if t + dt < 1.0 {
+                if t + dt < t_range.1 {
                     b.point_at(t + dt)
                 } else {
-                    b.end()
+                    b.point_at(t_range.1)
                 },
             ));
             t += dt;
@@ -114,13 +115,13 @@ impl Drawing {
         if cfg!(wasm32) {
             todo!()
         } else {
-            #[cfg(not(target_arch = "wasm32"))]
-            show_lines(
-                self.vertices.to_vec(),
-                _model,
-                _window_width,
-                _window_height,
-            )
+            // #[cfg(not(target_arch = "wasm32"))]
+            // show_lines(
+            //     self.vertices.to_vec(),
+            //     _model,
+            //     _window_width,
+            //     _window_height,
+            // )
         };
     }
 }
