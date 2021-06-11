@@ -82,14 +82,14 @@ pub fn pdf(drawing: &Drawing, paper_width: Option<f64>, paper_height: Option<f64
 
 fn draw_bezier(pdf: &mut String, b: Bezier, offset_x: f32, offset_y: f32) {
     let t_range = b.t_range();
-    let mut t = t_range.0;
-    let dt = t_range.1 / PRECISION as f64;
-    while t <= t_range.1 {
+    let mut t = t_range.from;
+    let dt = t_range.to / PRECISION as f64;
+    while t <= t_range.to {
         let p1 = b.point_at(t);
-        let p2 = if t + dt < t_range.1 {
+        let p2 = if t + dt < t_range.to {
             b.point_at(t + dt)
         } else {
-            b.point_at(t_range.1)
+            b.point_at(t_range.to)
         };
         draw_line(pdf, Line::new(p1, p2), offset_x, offset_y);
         t += dt;

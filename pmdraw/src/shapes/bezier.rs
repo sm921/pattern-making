@@ -1,4 +1,3 @@
-#![macro_use]
 use pmmath::{binomial::binomial, matrix::Mat};
 
 use super::point::{sigma, Point};
@@ -7,7 +6,7 @@ use super::point::{sigma, Point};
 pub struct Bezier {
     points: Vec<Point>,
     /// [Optional] - set range (from, to) to represent patial bezier curve
-    range: (Point, Point),
+    range: RangePoint,
 }
 
 impl Bezier {
@@ -36,6 +35,7 @@ impl Bezier {
     }
 
     /// fit points and parameter values of each point
+
     pub fn new_with_t(fit_points: Vec<Point>, t: Vec<f64>) -> Bezier {
         let count_points = fit_points.len();
 
@@ -53,7 +53,10 @@ impl Bezier {
         }
         Bezier {
             points,
-            range: (origin, end),
+            range: RangePoint {
+                from: origin,
+                to: end,
+            },
         }
     }
 
@@ -80,7 +83,7 @@ impl Bezier {
     }
 
     pub fn set_range(&mut self, from: Point, to: Point) {
-        self.range = (from, to);
+        self.range = RangePoint { from, to };
     }
 
     /// Solve parameter t of point p when p is somewhere on the curve by Newton's method
@@ -112,19 +115,35 @@ impl Bezier {
         }
     }
 
+    /// Split the curve and get two curves
+    pub fn split(&self, p: Point) -> Split {
+        let mut b1 = self.clone();
+        b1.set_range(self.origin(), p);
+        let mut b2 = self.clone();
+        b2.set_range(p, self.end());
+        Split { fst: b1, snd: b2 }
+    }
+
     /// Get range of t (0 to 1 by default)
-    pub fn t_range(&self) -> (f64, f64) {
-        let (from, to) = self.range;
+    pub fn t_range(&self) -> RangeF64 {
+        let range = self.range;
+        let from = range.from;
+        let to = range.to;
         if from == self.origin() && to == self.end() {
-            return (0.0, 1.0);
+            return RangeF64 { from: 0.0, to: 1.0 };
         }
-        (self.solve_t_at(self.range.0), self.solve_t_at(self.range.1))
+        RangeF64 {
+            from: self.solve_t_at(self.range.from),
+            to: self.solve_t_at(self.range.to),
+        }
     }
 
     pub fn to(&mut self, dx: f64, dy: f64) {
         for i in 0..self.points.len() {
             self.points[i] = self.points[i].to(dx, dy);
         }
+        self.range.from = self.range.from.to(dx, dy);
+        self.range.to = self.range.to.to(dx, dy);
     }
 }
 
@@ -215,4 +234,19 @@ fn solve_ctrl_points(points: Vec<Point>, t: Vec<f64>) -> Vec<Point> {
         ctrl_points[i] = Point::new(c[2 * i][0], c[2 * i + 1][0]);
     }
     ctrl_points
+}
+
+pub struct Split {
+    pub fst: Bezier,
+    pub snd: Bezier,
+}
+
+#[derive(Copy, Clone)]
+pub struct RangePoint {
+    pub from: Point,
+    pub to: Point,
+}
+pub struct RangeF64 {
+    pub from: f64,
+    pub to: f64,
 }

@@ -43,17 +43,24 @@ impl Line {
     }
 
     /// Split the line at a point and get two separate lines
-    pub fn split_at_x(&self, x: f64) -> (Line, Line) {
+    pub fn split_at_x(&self, x: f64) -> Split {
         let split_point = self.at_x(x);
-        (
-            Line::new(self.origin, split_point),
-            Line::new(split_point, self.end),
-        )
+        Split {
+            fst: Line::new(self.origin, split_point),
+            snd: Line::new(split_point, self.end),
+        }
     }
 
     /// move line
     pub fn to(&mut self, dx: f64, dy: f64) {
         self.origin = self.origin.to(dx, dy);
-        self.end = self.origin.to(dx, dy);
+        self.end = self.end.to(dx, dy);
     }
+}
+
+/// use this struct instead of tuple 'cause wasm is not capable of tuple
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+pub struct Split {
+    pub fst: Line,
+    pub snd: Line,
 }

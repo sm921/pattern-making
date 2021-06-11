@@ -10,3 +10,4 @@ crate-type = ["cdylib", "lib"]
 [dependencies]
 wasm-bindgen = "*"
 pmdraw = {path = "../pmdraw"}
+pmfile = {path = "../pmfile"}

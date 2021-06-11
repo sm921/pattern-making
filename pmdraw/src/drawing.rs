@@ -22,15 +22,15 @@ impl Drawing {
     pub fn bezier_with_precision(&mut self, b: &Bezier, precision: u32) {
         self.shapes.push(Shape::Bezier(b.clone()));
         let t_range = b.t_range();
-        let mut t = t_range.0;
-        let dt = t_range.1 / precision as f64;
-        while t <= t_range.1 {
+        let mut t = t_range.from;
+        let dt = t_range.to / precision as f64;
+        while t <= t_range.to {
             self.line_no_store(Line::new(
                 b.point_at(t),
-                if t + dt < t_range.1 {
+                if t + dt < t_range.to {
                     b.point_at(t + dt)
                 } else {
-                    b.point_at(t_range.1)
+                    b.point_at(t_range.to)
                 },
             ));
             t += dt;
