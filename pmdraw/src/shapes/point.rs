@@ -47,12 +47,13 @@ impl Point {
     }
 
     /// Rotate around z axis
-    pub fn rotate(&self, angle_degree: f64, origin: &Point) -> Point {
+    pub fn rotate(&mut self, angle_degree: f64, origin: Point) -> () {
         self.rotate_around_any_axis(angle_degree, origin, Axis::Z)
     }
-    pub fn rotate_around_any_axis(&self, angle_degree: f64, origin: &Point, axis: Axis) -> Point {
+
+    pub fn rotate_around_any_axis(&mut self, angle_degree: f64, origin: Point, axis: Axis) -> () {
         // relative to origin
-        let mut p = self - origin;
+        let mut p = self.clone() - origin;
         let (x, y, z) = (p.x, p.y, p.z);
         let theta = PI / 180.0 * angle_degree;
         let sin = theta.sin();
@@ -75,7 +76,10 @@ impl Point {
             }
         };
         // original coordinates
-        p + origin
+        p = p + origin;
+        self.x = p.x;
+        self.y = p.y;
+        self.z = p.z;
     }
 
     /// Create a new point relative to this point

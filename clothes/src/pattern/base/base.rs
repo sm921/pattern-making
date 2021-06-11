@@ -220,12 +220,14 @@ impl Base {
         let front_waist = split_wait.fst;
         let back_waist = split_wait.snd;
 
+        let p = back_arm_hole.parallel(0.5);
+
         Base {
             back: Back {
                 arm_hole: back_arm_hole,
                 dart1: back_dart_1,
                 dart2: back_dart_2,
-                neck: back_neck,
+                neck: p.right,
                 side,
                 shoulder: back_shoulder,
                 shoulder_dart,

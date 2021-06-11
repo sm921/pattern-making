@@ -4,6 +4,13 @@ use super::point::{sigma, Point};
 
 /// A general bezier of n points
 pub struct Bezier {
+    /// points that curve passses through (p0, p1, p2, ..., pn-1)
+    ///
+    /// used to get parallel curves
+    fit_points: Vec<Point>,
+    /// origin, control points, and end (p0, c1, c2, ..., cn-2, pn-1)
+    ///
+    /// used to plot the curve
     points: Vec<Point>,
     /// [Optional] - set range (from, to) to represent patial bezier curve
     range: RangePoint,
@@ -47,11 +54,12 @@ impl Bezier {
         points[count_points - 1] = end;
 
         // set ctrl points
-        let ctrl_points = solve_ctrl_points(fit_points, t);
+        let ctrl_points = solve_ctrl_points(&fit_points, t);
         for i in 0..count_points - 2 {
             points[i + 1] = ctrl_points[i];
         }
         Bezier {
+            fit_points,
             points,
             range: RangePoint {
                 from: origin,
@@ -138,6 +146,60 @@ impl Bezier {
         }
     }
 
+    pub fn parallel(&self, distance: f64) -> Parallel {
+        let mut vertical_directions: Vec<Point> = Vec::new();
+        for p in &self.fit_points {
+            let dbdt = self.derivative(self.solve_t_at(*p));
+            let d = if dbdt.y == 0.0 {
+                Point::new(0.0, -distance)
+            } else {
+                let vertical_slope = -dbdt.x / dbdt.y;
+                // dx = distance * cos(theta)
+                //  where cos(theta) = 1 / root(1 + slope^2)
+                let dx = distance / (1.0 + vertical_slope.powf(2.0)).sqrt();
+                // dy = distance * sin(theta)
+                //  where sin(theta) = 1 / root(1 + slope^2)
+                let dy = distance * vertical_slope / (1.0 + vertical_slope.powf(2.0)).sqrt();
+                Point::new(dx, dy)
+            };
+            vertical_directions.push(Point::new(d.x, d.y));
+        }
+
+        let make_parallel = |is_left: bool| -> Bezier {
+            let mut parallel_fit_points = Vec::new();
+            let mut range = self.range.clone();
+            for i in 0..self.fit_points.len() {
+                let d = if is_left { -1.0 } else { 1.0 } * vertical_directions[i];
+                let fit_point = self.fit_points[i];
+                let parallel_fit_point = fit_point.to(d.x, d.y);
+                parallel_fit_points.push(parallel_fit_point);
+                if fit_point == self.range.from {
+                    range.from = parallel_fit_point
+                }
+                if fit_point == self.range.to {
+                    range.to = parallel_fit_point
+                }
+            }
+            let mut bezier = Bezier::new(parallel_fit_points);
+            bezier.range = range;
+            bezier
+        };
+
+        Parallel {
+            left: make_parallel(true),
+            right: make_parallel(false),
+        }
+    }
+
+    /// Rotate around point
+    pub fn rotate(&mut self, angle_degree: f64, around: Point) -> () {
+        for i in 0..self.points.len() {
+            self.points[i].rotate(angle_degree, around);
+        }
+        self.range.from.rotate(angle_degree, around);
+        self.range.to.rotate(angle_degree, around);
+    }
+
     pub fn to(&mut self, dx: f64, dy: f64) {
         for i in 0..self.points.len() {
             self.points[i] = self.points[i].to(dx, dy);
@@ -149,12 +211,9 @@ impl Bezier {
 
 impl Clone for Bezier {
     fn clone(&self) -> Bezier {
-        let mut copy_points = vec![Point::new(0.0, 0.0); self.points.len()];
-        for i in 0..self.points.len() {
-            copy_points[i] = self.points[i];
-        }
         Bezier {
-            points: copy_points,
+            fit_points: self.fit_points.clone(),
+            points: self.points.clone(),
             range: self.range,
         }
     }
@@ -187,7 +246,7 @@ impl Clone for Bezier {
 ///all the elements of the vector b,
 ///and control points are solved by a linear equasion A c = b
 ///thus,  c = A^-1 * b; */
-fn solve_ctrl_points(points: Vec<Point>, t: Vec<f64>) -> Vec<Point> {
+fn solve_ctrl_points(points: &Vec<Point>, t: Vec<f64>) -> Vec<Point> {
     // number of points (p0, ..., pn-1)
     let n = points.len();
 
@@ -249,4 +308,9 @@ pub struct RangePoint {
 pub struct RangeF64 {
     pub from: f64,
     pub to: f64,
+}
+
+pub struct Parallel {
+    pub left: Bezier,
+    pub right: Bezier,
 }

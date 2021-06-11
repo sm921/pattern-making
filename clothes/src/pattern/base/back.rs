@@ -1,4 +1,4 @@
-use pmdraw::shapes::{bezier::Bezier, line::Line};
+use pmdraw::shapes::{bezier::Bezier, line::Line, point::Point};
 
 use crate::pattern::{common::dart::Dart, measurements::Cm};
 
@@ -44,6 +44,20 @@ impl Back {
         ] {
             callback(line)
         }
+    }
+
+    pub fn rotate(&mut self, angle_degree: f64, around: Point) {
+        self.for_each_bezier_mut(|b| b.rotate(angle_degree, around));
+        self.for_each_line_mut(|l| l.rotate(angle_degree, around));
+    }
+
+    pub fn rotate_around_center(&mut self, angle_degree: f64) {
+        let center = self
+            .waist
+            .midddle()
+            .to(0.0, self.waist.end.middle(self.side.end).y);
+        self.for_each_bezier_mut(|b| b.rotate(angle_degree, center));
+        self.for_each_line_mut(|l| l.rotate(angle_degree, center));
     }
 
     pub fn to(&mut self, dx: Cm, dy: Cm) {
