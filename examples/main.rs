@@ -17,6 +17,7 @@ fn main() {
         },
         15.0,
     );
-    base.back.to(1.0, 1.0);
-    export_base(&base, 900, 900, Some(560.0), Some(690.0));
+    base.front.to(1.5, 1.5);
+    base.back.to(3.0, 3.0);
+    export_base(&base, 900, 900, Some(560.0), Some(690.0), true);
 }

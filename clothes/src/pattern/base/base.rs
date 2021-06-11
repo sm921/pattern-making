@@ -10,9 +10,10 @@ use crate::pattern::{
     measurements::{Cm, Measurements},
 };
 
-use super::back::Back;
+use super::{back::Back, margin::Margin};
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[derive(Clone)]
 pub struct Base {
     pub back: Back,
     pub front: Front,
@@ -20,6 +21,9 @@ pub struct Base {
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Base {
+    pub fn margin(&self) -> Margin {
+        Margin::new(self)
+    }
     pub fn for_each_bezier<T>(&self, mut callback: T)
     where
         T: FnMut(&Bezier) -> (),
@@ -66,10 +70,6 @@ impl Base {
         }
     }
 
-    // pub fn to(&mut self, dx:Cm, dy:Cm) ->() {
-    //     self.front.
-    // }
-
     /// Create base pattern
     /// - m measurements of body
     /// - amount of dart - typically from 4 to 15 cm
@@ -80,29 +80,29 @@ impl Base {
         let neck_depth = m.neck_size / (2.0 * PI) * 1.7;
 
         let center_front = Line::new(
-            Point::new(0.0, 0.0),
             Point::new(0.0, m.hps_to_waist - neck_depth - 0.5),
+            Point::new(0.0, 0.0),
         );
 
         let front_neck = Bezier::new(vec![
-            center_front.end,
+            center_front.origin.to(neck_depth, neck_depth),
             center_front
-                .end
+                .origin
                 .to(neck_depth / 3.0 * 2.0, neck_depth / 3.0),
-            center_front.end.to(neck_depth, neck_depth),
+            center_front.origin,
         ]);
 
         let shoulder = Line::new(
-            front_neck.end(),
-            front_neck.end().to_angular(-22.0, m.shoulder),
+            front_neck.origin().to_angular(-22.0, m.shoulder),
+            front_neck.origin(),
         );
 
-        let waist = Line::new(center_front.origin, center_front.origin.to(waist, 0.0));
+        let waist = Line::new(center_front.end, center_front.end.to(waist, 0.0));
 
         let center_back = Line::new(waist.end, waist.end.to(0.0, m.nape_to_waist));
 
         let chest = Line::new(
-            center_front.point_from_end((m.armscye_depth - neck_depth) + 3.0),
+            center_front.point_from_origin((m.armscye_depth - neck_depth) + 3.0),
             center_back.point_from_end(m.armscye_depth + 3.0),
         );
 
@@ -112,16 +112,16 @@ impl Base {
             .middle(chest.origin)
             .to(0.7, 0.0);
         let arm_hole_radius = (center_back.end - chest.end).norm() / 2.0;
-        let chest_dart_end = arm_hole_left_bottom.to(0.0, arm_hole_radius / 3.0 * 2.0);
-        let chest_dart_bottom = Line::new(chest_dart_middle, chest_dart_end);
-        let chest_dart_origin = Point::new(
-            chest_dart_end.x - 0.7,
+        let chest_dart_fst = arm_hole_left_bottom.to(0.0, arm_hole_radius / 3.0 * 2.0);
+        let chest_dart_bottom = Line::new(chest_dart_middle, chest_dart_fst);
+        let chest_dart_snd = Point::new(
+            chest_dart_fst.x - 0.7,
             chest_dart_middle.y
                 + (chest_dart_bottom.len().powf(2.0)
                     - (arm_hole_left_bottom.x - 0.7 - chest_dart_middle.x).powf(2.0))
                 .sqrt(),
         );
-        let chest_dart = Dart::new(chest_dart_origin, chest_dart_middle, chest_dart_end);
+        let chest_dart = Dart::new(chest_dart_fst, chest_dart_middle, chest_dart_snd);
 
         let back_neck_origin = center_back
             .end
@@ -143,32 +143,32 @@ impl Base {
 
         // create arm hole
         let front_arm_hole_1 = Bezier::new(vec![
-            shoulder.end,
+            chest_dart_snd,
             shoulder
-                .end
-                .middle(chest_dart_origin)
+                .origin
+                .middle(chest_dart_snd)
                 .to_angular(135.0, 1.0),
-            chest_dart_origin,
+            shoulder.origin,
         ]);
         let arm_hole_right_bottom = chest.point_from_end(m.x_back / 2.0);
-        let arm_hole_right = Point::new(arm_hole_right_bottom.x, chest_dart_end.y);
+        let arm_hole_right = Point::new(arm_hole_right_bottom.x, chest_dart_fst.y);
         let arm_hole_ctrl_radius = (arm_hole_right_bottom.x - arm_hole_left_bottom.x) / 6.0 + 0.5;
         let arm_hole_bottom = arm_hole_left_bottom.middle(arm_hole_right_bottom);
         let front_to_back_arm_hole = Bezier::new(vec![
-            chest_dart_end,
-            arm_hole_left_bottom.to_angular(45.0, arm_hole_ctrl_radius),
-            arm_hole_bottom,
-            arm_hole_right_bottom.to_angular(135.0, arm_hole_ctrl_radius),
-            arm_hole_right,
             back_shoulder.end,
+            arm_hole_right,
+            arm_hole_right_bottom.to_angular(135.0, arm_hole_ctrl_radius),
+            arm_hole_bottom,
+            arm_hole_left_bottom.to_angular(45.0, arm_hole_ctrl_radius),
+            chest_dart_fst,
         ]);
         let split_armhole = front_to_back_arm_hole.split(arm_hole_bottom);
-        let front_arm_hole_2 = split_armhole.fst;
-        let back_arm_hole = split_armhole.snd;
+        let back_arm_hole = split_armhole.fst;
+        let front_arm_hole_2 = split_armhole.snd;
         let front_arm_hole = (front_arm_hole_1, front_arm_hole_2);
 
         // create dart
-        let front_dart_middle = chest_dart.snd.at_x(chest.at_x(chest_dart_origin.x).x - 0.8);
+        let front_dart_middle = chest_dart.fst.at_x(chest.at_x(chest_dart_snd.x).x - 0.8);
         let front_dart = Dart::new(
             Point::new(front_dart_middle.x - dart * 0.08, 0.0),
             front_dart_middle,
@@ -177,7 +177,7 @@ impl Base {
 
         let side_dart_middle = arm_hole_left_bottom.middle(arm_hole_right_bottom);
         let side_dart_right = Point::new(side_dart_middle.x, 0.0);
-        let side = Line::new(side_dart_middle, side_dart_right);
+        let side = Line::new(side_dart_right, side_dart_middle);
         let side_dart = Dart::new(
             Point::new(side_dart_middle.x - dart * 0.16, 0.0),
             side_dart_middle,
@@ -220,14 +220,12 @@ impl Base {
         let front_waist = split_wait.fst;
         let back_waist = split_wait.snd;
 
-        let p = back_arm_hole.parallel(0.5);
-
         Base {
             back: Back {
                 arm_hole: back_arm_hole,
                 dart1: back_dart_1,
                 dart2: back_dart_2,
-                neck: p.right,
+                neck: back_neck,
                 side,
                 shoulder: back_shoulder,
                 shoulder_dart,

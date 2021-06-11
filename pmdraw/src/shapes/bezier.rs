@@ -4,13 +4,9 @@ use super::point::{sigma, Point};
 
 /// A general bezier of n points
 pub struct Bezier {
-    /// points that curve passses through (p0, p1, p2, ..., pn-1)
-    ///
-    /// used to get parallel curves
+    /// fit points - used to culculate parallel lines
     fit_points: Vec<Point>,
-    /// origin, control points, and end (p0, c1, c2, ..., cn-2, pn-1)
-    ///
-    /// used to plot the curve
+    /// origin, end, and control points
     points: Vec<Point>,
     /// [Optional] - set range (from, to) to represent patial bezier curve
     range: RangePoint,
@@ -19,7 +15,11 @@ pub struct Bezier {
 impl Bezier {
     /// derivative dB/dt = (dx/dt, dy/dt)
     fn derivative(&self, t: f64) -> Point {
-        (self.point_at(t + 0.001) - self.point_at(t)) / 0.001
+        if t == 1.0 {
+            (self.point_at(t) - self.point_at(t - 0.001)) / 0.001
+        } else {
+            (self.point_at(t + 0.001) - self.point_at(t)) / 0.001
+        }
     }
 
     pub fn end(&self) -> Point {
@@ -147,44 +147,27 @@ impl Bezier {
     }
 
     pub fn parallel(&self, distance: f64) -> Parallel {
-        let mut vertical_directions: Vec<Point> = Vec::new();
-        for p in &self.fit_points {
-            let dbdt = self.derivative(self.solve_t_at(*p));
-            let d = if dbdt.y == 0.0 {
-                Point::new(0.0, -distance)
-            } else {
-                let vertical_slope = -dbdt.x / dbdt.y;
-                // dx = distance * cos(theta)
-                //  where cos(theta) = 1 / root(1 + slope^2)
-                let dx = distance / (1.0 + vertical_slope.powf(2.0)).sqrt();
-                // dy = distance * sin(theta)
-                //  where sin(theta) = 1 / root(1 + slope^2)
-                let dy = distance * vertical_slope / (1.0 + vertical_slope.powf(2.0)).sqrt();
-                Point::new(dx, dy)
-            };
-            vertical_directions.push(Point::new(d.x, d.y));
-        }
-
-        let make_parallel = |is_left: bool| -> Bezier {
-            let mut parallel_fit_points = Vec::new();
+        let make_parallel = |is_left: bool| {
+            let mut fit_poitns = Vec::new();
             let mut range = self.range.clone();
-            for i in 0..self.fit_points.len() {
-                let d = if is_left { -1.0 } else { 1.0 } * vertical_directions[i];
-                let fit_point = self.fit_points[i];
-                let parallel_fit_point = fit_point.to(d.x, d.y);
-                parallel_fit_points.push(parallel_fit_point);
-                if fit_point == self.range.from {
-                    range.from = parallel_fit_point
+            for i in 0..self.points.len() {
+                let p = self.fit_points[i];
+                let p_next = self.point_at(self.solve_t_at(self.fit_points[i]) + 0.001);
+                let mut parallel_point = p_next.clone();
+                parallel_point.rotate(if is_left { 90.0 } else { -90.0 }, p);
+                parallel_point = p.to_point(parallel_point, distance);
+                fit_poitns.push(parallel_point);
+                if p == self.range.from {
+                    range.from = parallel_point
                 }
-                if fit_point == self.range.to {
-                    range.to = parallel_fit_point
+                if p == self.range.to {
+                    range.to = parallel_point
                 }
             }
-            let mut bezier = Bezier::new(parallel_fit_points);
-            bezier.range = range;
-            bezier
+            let mut parallel_bezier = Bezier::new(fit_poitns);
+            parallel_bezier.range = range;
+            parallel_bezier
         };
-
         Parallel {
             left: make_parallel(true),
             right: make_parallel(false),
@@ -201,6 +184,9 @@ impl Bezier {
     }
 
     pub fn to(&mut self, dx: f64, dy: f64) {
+        for i in 0..self.fit_points.len() {
+            self.fit_points[i] = self.fit_points[i].to(dx, dy);
+        }
         for i in 0..self.points.len() {
             self.points[i] = self.points[i].to(dx, dy);
         }

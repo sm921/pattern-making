@@ -2,6 +2,7 @@ use pmdraw::shapes::{bezier::Bezier, line::Line, point::Point};
 
 use crate::pattern::{common::dart::Dart, measurements::Cm};
 
+#[derive(Clone)]
 pub struct Back {
     pub arm_hole: Bezier,
     pub dart1: Dart,

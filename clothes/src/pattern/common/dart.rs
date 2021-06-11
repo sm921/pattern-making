@@ -2,6 +2,7 @@ use pmdraw::shapes::{line::Line, point::Point};
 
 use crate::pattern::measurements::Cm;
 
+#[derive(Clone)]
 pub struct Dart {
     pub fst: Line,
     pub snd: Line,
@@ -12,10 +13,10 @@ impl Dart {
     /// - fst - first line's edge point
     /// - snd - second line's edge point
     /// - middle - common edge point of the fist and second lines
-    pub fn new(fst: Point, middle: Point, snd: Point) -> Dart {
+    pub fn new(fst_edge: Point, middle: Point, snd_edge: Point) -> Dart {
         Dart {
-            fst: Line::new(middle, fst),
-            snd: Line::new(middle, snd),
+            fst: Line::new(fst_edge, middle),
+            snd: Line::new(middle, snd_edge),
         }
     }
 

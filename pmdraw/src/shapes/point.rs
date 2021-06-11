@@ -4,6 +4,8 @@ use std::f64::consts::PI;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+use super::line::Line;
+
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Copy, Clone)]
 pub struct Point {
@@ -22,6 +24,14 @@ pub enum Axis {
 impl Point {
     pub fn between(&self, another: Point, t: f64) -> Point {
         (1.0 - t) * self.clone() + t * another
+    }
+
+    pub fn distance(&self, another: Point) -> f64 {
+        self.line_to(another).len()
+    }
+
+    pub fn line_to(&self, point: Point) -> Line {
+        Line::new(*self, point)
     }
 
     pub fn middle(&self, another: Point) -> Point {
