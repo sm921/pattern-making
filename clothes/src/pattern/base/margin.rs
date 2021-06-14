@@ -21,7 +21,6 @@ impl Margin {
         front.chest_dart.fst = front.side.join_bezier(&mut front.arm_hole.0);
         front.chest_dart.snd = front.arm_hole.0.join(&front.arm_hole.1);
         front.side_dart.fst = front.arm_hole.1.join_line(&mut front.shoulder);
-        front.shoulder.extend_end(1.0);
         front.side_dart.snd = front.shoulder.join_bezier(&mut front.neck);
         front.dart.fst = front.neck.join_line(&mut front.center);
         front.center.join(&mut front.waist);

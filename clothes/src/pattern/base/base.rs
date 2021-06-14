@@ -77,7 +77,7 @@ impl Base {
     pub fn new(m: Measurements, dart: Cm) -> Base {
         Base::assert_measurements(&m);
         let waist = m.waist / 2.0 + 2.0 + dart;
-        let neck_depth = m.neck_size / (2.0 * PI) * 1.7;
+        let neck_depth = m.neck_size / 5.0 - 0.5;
 
         let center_front = Line::new(
             Point::new(0.0, m.hps_to_waist - neck_depth - 0.5),

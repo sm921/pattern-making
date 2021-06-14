@@ -112,6 +112,12 @@ impl Bezier {
 
     /// Solve parameter t of point p when p is somewhere on the curve by Newton's method
     pub fn solve_t_at(&self, p: Point) -> f64 {
+        if p == self.origin() {
+            return 0.0;
+        }
+        if p == self.end() {
+            return 1.0;
+        }
         let tolerance = 0.1;
         let (mut learning_rate_x, mut learning_rate_y) = (1.0, 1.0);
         // initial guess
@@ -121,9 +127,21 @@ impl Bezier {
             let db_dt = self.derivative(t);
             // update t by Newton's method
             let p0 = self.point_at(t);
-            let t1 = t
+            let t1 = match t
                 + learning_rate_y * (p.y - p0.y) / db_dt.y
-                + learning_rate_x * (p.x - p0.x) / db_dt.x;
+                + learning_rate_x * (p.x - p0.x) / db_dt.x
+            {
+                // set uppder bound and lowerbound to prevent diverge
+                t @ _ => {
+                    if t > 1.0 {
+                        1.0
+                    } else if t < 0.0 {
+                        0.0
+                    } else {
+                        t
+                    }
+                }
+            };
             // validate new t
             let p1 = self.point_at(t1);
             let dif = p - p1;
