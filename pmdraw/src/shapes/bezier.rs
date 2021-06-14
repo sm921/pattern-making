@@ -1,20 +1,23 @@
 use pmmath::{binomial::binomial, matrix::Mat};
 
-use super::point::{sigma, Point};
+use super::{
+    line::Line,
+    point::{sigma, Point},
+};
 
 /// A general bezier of n points
 pub struct Bezier {
     /// fit points - used to culculate parallel lines
-    fit_points: Vec<Point>,
+    pub fit_points: Vec<Point>,
     /// origin, end, and control points
     points: Vec<Point>,
     /// [Optional] - set range (from, to) to represent patial bezier curve
-    range: RangePoint,
+    pub range: RangePoint,
 }
 
 impl Bezier {
     /// derivative dB/dt = (dx/dt, dy/dt)
-    fn derivative(&self, t: f64) -> Point {
+    pub fn derivative(&self, t: f64) -> Point {
         if t == 1.0 {
             (self.point_at(t) - self.point_at(t - 0.001)) / 0.001
         } else {
@@ -24,6 +27,19 @@ impl Bezier {
 
     pub fn end(&self) -> Point {
         self.points[self.points.len() - 1]
+    }
+
+    pub fn join(&self, b: &Bezier) -> Line {
+        self.range.to.line_to(b.range.from)
+    }
+
+    pub fn join_line(&mut self, l: &mut Line) -> Line {
+        let mut bezier_edge = self
+            .range
+            .to
+            .line_to(self.point_at(self.t_range().to + 0.01));
+        l.join(&mut bezier_edge);
+        bezier_edge
     }
 
     /// fit points
@@ -95,7 +111,7 @@ impl Bezier {
     }
 
     /// Solve parameter t of point p when p is somewhere on the curve by Newton's method
-    fn solve_t_at(&self, p: Point) -> f64 {
+    pub fn solve_t_at(&self, p: Point) -> f64 {
         let tolerance = 0.1;
         let (mut learning_rate_x, mut learning_rate_y) = (1.0, 1.0);
         // initial guess
@@ -135,15 +151,17 @@ impl Bezier {
     /// Get range of t (0 to 1 by default)
     pub fn t_range(&self) -> RangeF64 {
         let range = self.range;
-        let from = range.from;
-        let to = range.to;
-        if from == self.origin() && to == self.end() {
-            return RangeF64 { from: 0.0, to: 1.0 };
-        }
-        RangeF64 {
-            from: self.solve_t_at(self.range.from),
-            to: self.solve_t_at(self.range.to),
-        }
+        let from = if range.from == self.origin() {
+            0.0
+        } else {
+            self.solve_t_at(range.from)
+        };
+        let to = if range.to == self.end() {
+            1.0
+        } else {
+            self.solve_t_at(range.to)
+        };
+        RangeF64 { from, to }
     }
 
     pub fn parallel(&self, distance: f64) -> Parallel {
@@ -152,7 +170,7 @@ impl Bezier {
             let mut range = self.range.clone();
             for i in 0..self.points.len() {
                 let p = self.fit_points[i];
-                let p_next = self.point_at(self.solve_t_at(self.fit_points[i]) + 0.001);
+                let p_next = self.point_at(self.solve_t_at(self.fit_points[i]) + 0.01);
                 let mut parallel_point = p_next.clone();
                 parallel_point.rotate(if is_left { 90.0 } else { -90.0 }, p);
                 parallel_point = p.to_point(parallel_point, distance);
@@ -172,6 +190,31 @@ impl Bezier {
             left: make_parallel(true),
             right: make_parallel(false),
         }
+    }
+
+    /// refit bezier curve with new fit_points
+    ///
+    /// range is reset uness explicity set
+    pub fn refit<T>(
+        &mut self,
+        mut modify: T,
+        range_from: Option<Point>,
+        range_end: Option<Point>,
+    ) -> ()
+    where
+        T: FnMut(&mut Vec<Point>) -> Vec<Point>,
+    {
+        let new_b = Bezier::new(modify(&mut self.fit_points));
+        self.fit_points = new_b.fit_points;
+        self.points = new_b.points;
+        self.range.from = match range_from {
+            Some(p) => p,
+            None => self.range.from,
+        };
+        self.range.to = match range_end {
+            Some(p) => p,
+            None => self.range.to,
+        };
     }
 
     /// Rotate around point

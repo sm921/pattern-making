@@ -1,4 +1,4 @@
-use super::point::Point;
+use super::{bezier::Bezier, point::Point};
 use pmmath::matrix::Mat;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -29,6 +29,14 @@ impl Line {
         self.origin.between(self.end, t)
     }
 
+    pub fn extend_end(&mut self, length: f64) -> () {
+        self.end = self.end + (length / self.len()) * self.vec()
+    }
+
+    pub fn extend_origin(&mut self, length: f64) -> () {
+        self.origin = self.origin - (length / self.len()) * self.vec()
+    }
+
     /// Get point where two lines intersect
     ///
     /// f(t) = t1 * a1 - t2 * a2 = c
@@ -37,6 +45,15 @@ impl Line {
     ///         a2 = end2 - origin2
     ///         b = -origin1 + origin2
     pub fn intersection(&self, l: &Line) -> Point {
+        // vertical
+        if self.vec().x == 0.0 {
+            return l.at_x(self.origin.x);
+        }
+        // horizontal
+        if self.vec().y == 0.0 {
+            return l.at_y(self.origin.y);
+        }
+
         let mut a = Mat::new(2, 2);
         let a1 = self.end - self.origin;
         let a2 = l.end - l.origin;
@@ -49,8 +66,14 @@ impl Line {
         b[0][0] = c.x;
         b[1][0] = c.y;
         let solve = a.inverse().unwrap() * b;
+        // use smaller t to reduce error
         let t1 = solve[0][0];
-        self.between(t1)
+        let t2 = solve[1][0];
+        if t1 > t2 {
+            l.between(t2)
+        } else {
+            self.between(t1)
+        }
     }
 
     /// Join two lines by extending both of them
@@ -67,6 +90,13 @@ impl Line {
         };
         extend(self);
         extend(l);
+    }
+
+    pub fn join_bezier(&mut self, b: &mut Bezier) -> Line {
+        let p = b.point_at(b.t_range().from + 0.01);
+        let mut bezier_edge = b.range.from.line_to(p);
+        self.join(&mut bezier_edge);
+        bezier_edge
     }
 
     pub fn midddle(&self) -> Point {
@@ -106,42 +136,17 @@ impl Line {
     }
 
     pub fn parallel(&self, distance: f64) -> Parallel {
-        let line_as_vector = self.end - self.origin;
-        let d = if line_as_vector.y == 0.0 {
-            Point::new(
-                0.0,
-                if line_as_vector.x > 0.0 {
-                    -distance
-                } else {
-                    distance
-                },
-            )
-        }
-        // vertical
-        else if line_as_vector.x == 0.0 {
-            Point::new(
-                if line_as_vector.y > 0.0 {
-                    distance
-                } else {
-                    -distance
-                },
-                0.0,
-            )
-        } else {
-            let vertical_slope = -line_as_vector.x / line_as_vector.y;
-            // dx = distance * cos(theta)
-            //  where theta = 1 / root(1 + slope^2)
-            let dx = distance / (1.0 + vertical_slope.powf(2.0)).sqrt();
-            // dy = distance * sin(theta)
-            //  where theta = slope / root(1 + slope^2)
-            let dy = distance * vertical_slope / (1.0 + vertical_slope.powf(2.0)).sqrt();
-            Point::new(dx, dy)
+        let parall_line = |is_left: bool| -> Line {
+            let mut parallel_origin = self.point_from_origin(distance);
+            parallel_origin.rotate(if is_left { 90.0 } else { -90.0 }, self.origin);
+            let mut parallel_end = self.point_from_end(distance);
+            parallel_end.rotate(if is_left { -90.0 } else { 90.0 }, self.end);
+            parallel_origin.line_to(parallel_end)
         };
-        let mut left = self.clone();
-        left.to(-d.x, -d.y);
-        let mut right = self.clone();
-        right.to(d.x, d.y);
-        Parallel { left, right }
+        Parallel {
+            left: parall_line(true),
+            right: parall_line(false),
+        }
     }
 
     /// Get a point on this line by specifying distance from the line's end
@@ -173,6 +178,10 @@ impl Line {
     pub fn to(&mut self, dx: f64, dy: f64) {
         self.origin = self.origin.to(dx, dy);
         self.end = self.end.to(dx, dy);
+    }
+
+    pub fn vec(&self) -> Point {
+        self.end - self.origin
     }
 }
 

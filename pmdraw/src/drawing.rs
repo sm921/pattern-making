@@ -3,6 +3,8 @@ use std::f64::consts::PI;
 // #[cfg(not(target_arch = "wasm32"))]
 // use pmrender::show_lines;
 
+use pmrender::show_lines;
+
 use crate::shapes::{bezier::Bezier, circle::Circle, line::Line, point::Point, Shape};
 
 #[derive(Clone)]
@@ -116,12 +118,12 @@ impl Drawing {
             todo!()
         } else {
             // #[cfg(not(target_arch = "wasm32"))]
-            // show_lines(
-            //     self.vertices.to_vec(),
-            //     _model,
-            //     _window_width,
-            //     _window_height,
-            // )
+            show_lines(
+                self.vertices.to_vec(),
+                _model,
+                _window_width,
+                _window_height,
+            )
         };
     }
 }

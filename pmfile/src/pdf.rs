@@ -14,7 +14,12 @@ const PRECISION: u32 = 100;
 /// Create PDF file
 /// - paper_width - width of document in millimeter
 /// - paper_width - width of document in millimeter
-pub fn pdf(drawing: &Drawing, paper_width: Option<f64>, paper_height: Option<f64>) -> String {
+pub fn pdf(
+    file_name: &str,
+    drawing: &Drawing,
+    paper_width: Option<f64>,
+    paper_height: Option<f64>,
+) -> String {
     let paper_width = match paper_width {
         Some(custom_width) => to_pt(custom_width / 10.0),
         None => A3_WIDTH,
@@ -75,7 +80,8 @@ pub fn pdf(drawing: &Drawing, paper_width: Option<f64>, paper_height: Option<f64
     write_info(&mut out, page_id_list);
     write_xref(&mut out, object_positions, object_end_position);
     out.push_str("%%EOF");
-    let mut file = File::create("drawing.pdf").unwrap();
+    let file_path = String::from("clothes/out/");
+    let mut file = File::create(file_path + file_name).unwrap();
     file.write_all(out.as_bytes()).unwrap();
     out
 }

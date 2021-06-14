@@ -32,7 +32,7 @@ Using WebAssembly, the program runs on the both of browser and desktop
 
   ~~export as dxf ([sample](dxf))~~ **in favor of use of printers with real sized PDF, but may be implemented in future to use drawings with laser cutters**
 
-- [x] export as pdf ([sample](drawing.pdf))
+- [x] export as pdf ([sample](clothes/out/base.pdf))
 
   ~~draw spline~~ **in favor of ARBITRARY DIMENSIONS bezier curve dependent on FIT POINTS, not ctrl points**
 

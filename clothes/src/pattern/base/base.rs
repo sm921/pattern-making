@@ -123,22 +123,22 @@ impl Base {
         );
         let chest_dart = Dart::new(chest_dart_fst, chest_dart_middle, chest_dart_snd);
 
-        let back_neck_origin = center_back
+        let back_neck_end = center_back
             .end
             .to(-neck_depth - 0.3, (neck_depth + 3.0) / 3.0 - 0.3);
         let back_neck = Bezier::new(vec![
-            back_neck_origin,
+            center_back.end,
             Point::new(
-                back_neck_origin.between(center_back.end, 0.333).x,
+                back_neck_end.between(center_back.end, 0.333).x,
                 center_back.end.y + 0.5,
             ),
-            center_back.end,
+            back_neck_end,
         ]);
 
         let shoulder_dart_width = (m.x_front + m.x_back) / 32.0;
         let back_shoulder = Line::new(
-            back_neck_origin,
-            back_neck_origin.to_angular(21.0, -(shoulder.len() + shoulder_dart_width)),
+            back_neck_end,
+            back_neck_end.to_angular(21.0, -(shoulder.len() + shoulder_dart_width)),
         );
 
         // create arm hole
@@ -164,8 +164,8 @@ impl Base {
         ]);
         let split_armhole = front_to_back_arm_hole.split(arm_hole_bottom);
         let back_arm_hole = split_armhole.fst;
-        let front_arm_hole_2 = split_armhole.snd;
-        let front_arm_hole = (front_arm_hole_1, front_arm_hole_2);
+        let front_arm_hole_0 = split_armhole.snd;
+        let front_arm_hole = (front_arm_hole_0, front_arm_hole_1);
 
         // create dart
         let front_dart_middle = chest_dart.fst.at_x(chest.at_x(chest_dart_snd.x).x - 0.8);
@@ -178,6 +178,7 @@ impl Base {
         let side_dart_middle = arm_hole_left_bottom.middle(arm_hole_right_bottom);
         let side_dart_right = Point::new(side_dart_middle.x, 0.0);
         let side = Line::new(side_dart_right, side_dart_middle);
+        let side_back = Line::new(side_dart_middle, side_dart_right);
         let side_dart = Dart::new(
             Point::new(side_dart_middle.x - dart * 0.16, 0.0),
             side_dart_middle,
@@ -192,8 +193,8 @@ impl Base {
         );
 
         let center_back_dart = Line::new(
-            center_back.end.middle(chest.end),
             waist.point_from_end(dart * 0.08),
+            center_back.end.middle(chest.end),
         );
 
         let shoulder_dart_middle =
@@ -220,13 +221,13 @@ impl Base {
         let front_waist = split_wait.fst;
         let back_waist = split_wait.snd;
 
-        Base {
+        let mut base = Base {
             back: Back {
                 arm_hole: back_arm_hole,
                 dart1: back_dart_1,
                 dart2: back_dart_2,
                 neck: back_neck,
-                side,
+                side: side_back,
                 shoulder: back_shoulder,
                 shoulder_dart,
                 center: center_back,
@@ -244,7 +245,10 @@ impl Base {
                 chest_dart,
                 waist: front_waist,
             },
-        }
+        };
+        base.back.to(3.0, 1.0);
+        base.front.to(1.0, 1.0);
+        base
     }
 
     fn assert_measurements(m: &Measurements) {

@@ -8,14 +8,16 @@ const DRAWING_MARGIN: f64 = 9.0;
 
 pub fn export_base(
     base: &Base,
-    window_width: u32,
-    window_height: u32,
     paper_width: Option<f64>,
     paper_height: Option<f64>,
     draws_margin: bool,
-) -> () {
-    let drawing_width = base.back.waist.len() + DRAWING_MARGIN;
-    let drawing_height = base.front.shoulder.origin.y + DRAWING_MARGIN;
+) -> Drawing {
+    let mut base = base.clone();
+    // fit A3 size
+    let fit_a3_width = 0.0; //29.7 + 3.0 + 1.0; // (A3 width) + (space between front and back) + (margin of back)
+    base.back.to(fit_a3_width, 0.0);
+    let drawing_width = fit_a3_width + base.back.waist.len() + DRAWING_MARGIN;
+    let drawing_height = base.back.shoulder.origin.y + DRAWING_MARGIN;
 
     let mut draw = Drawing::new(drawing_width, drawing_height);
     base.for_each_line(|l| draw.line(l));
@@ -26,6 +28,6 @@ pub fn export_base(
         margin.base.for_each_bezier(|b| draw.bezier(b));
     }
 
-    // draw.show(window_width, window_height);
-    pdf(&draw, paper_width, paper_height);
+    pdf("base.pdf", &draw, paper_width, paper_height);
+    draw
 }

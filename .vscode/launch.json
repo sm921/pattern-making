@@ -1,140 +1,139 @@
 {
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387 "version": "0.2.0",
     "configurations": [
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug unit tests in library 'clothes'",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--lib",
-                "--package=clothes"
-            ],
-            "filter": {
-                "name": "clothes",
-                "kind": "lib"
-            }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'clothes'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=clothes"
+                ],
+                "filter": {
+                    "name": "clothes",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug unit tests in library 'pmdraw'",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--lib",
-                "--package=pmdraw"
-            ],
-            "filter": {
-                "name": "pmdraw",
-                "kind": "lib"
-            }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmdraw'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmdraw"
+                ],
+                "filter": {
+                    "name": "pmdraw",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug unit tests in library 'pmmath'",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--lib",
-                "--package=pmmath"
-            ],
-            "filter": {
-                "name": "pmmath",
-                "kind": "lib"
-            }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmmath'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmmath"
+                ],
+                "filter": {
+                    "name": "pmmath",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug unit tests in library 'pmrender'",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--lib",
-                "--package=pmrender"
-            ],
-            "filter": {
-                "name": "pmrender",
-                "kind": "lib"
-            }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmrender'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmrender"
+                ],
+                "filter": {
+                    "name": "pmrender",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug unit tests in library 'pmfile'",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--lib",
-                "--package=pmfile"
-            ],
-            "filter": {
-                "name": "pmfile",
-                "kind": "lib"
-            }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pmfile'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pmfile"
+                ],
+                "filter": {
+                    "name": "pmfile",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug example 'main'",
-        "cargo": {
-            "args": [
-                "build",
-                "--example=main",
-                "--package=pattern_making"
-            ],
-            "filter": {
-                "name": "main",
-                "kind": "example"
-            }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'main'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=main",
+                    "--package=pattern_making"
+                ],
+                "filter": {
+                    "name": "main",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
-    {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Debug unit tests in example 'main'",
-        "cargo": {
-            "args": [
-                "test",
-                "--no-run",
-                "--example=main",
-                "--package=pattern_making"
-            ],
-            "filter": {
-                "name": "main",
-                "kind": "example"
-            }
-        },
-        "args": [],
-        "cwd": "${workspaceFolder}"
-    },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'main'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=main",
+                    "--package=pattern_making"
+                ],
+                "filter": {
+                    "name": "main",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
     ]
 }

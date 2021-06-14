@@ -3,7 +3,7 @@ use clothes::{
     pattern::{base::base::Base, measurements::Measurements},
 };
 fn main() {
-    let mut base = Base::new(
+    let base = Base::new(
         Measurements {
             waist: 60.0,
             hps_to_waist: 57.0,
@@ -17,7 +17,6 @@ fn main() {
         },
         15.0,
     );
-    base.front.to(1.5, 1.5);
-    base.back.to(3.0, 3.0);
-    export_base(&base, 900, 900, Some(560.0), Some(690.0), true);
+    let draw = export_base(&base, None, None, true);
+    draw.show(900, 900);
 }
