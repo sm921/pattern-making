@@ -18,5 +18,5 @@ fn main() {
         9.5,
     );
     let draw = export_base(&base, None, None, true);
-    draw.show(900, 900);
+    // draw.show(900, 900);
 }

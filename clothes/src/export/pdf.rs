@@ -1,5 +1,5 @@
 use pmdraw::drawing::Drawing;
-use pmfile::pdf::pdf;
+use pmfile::{pdf::pdf, pdf2::pdf2};
 
 use crate::pattern::base::base::Base;
 
@@ -28,6 +28,7 @@ pub fn export_base(
         margin.base.for_each_bezier(|b| draw.bezier(b));
     }
 
-    pdf("base.pdf", &draw, paper_width, paper_height);
+    pdf("_base.pdf", &draw, paper_width, paper_height);
+    pdf2("base.pdf", &draw, paper_width, paper_height);
     draw
 }
