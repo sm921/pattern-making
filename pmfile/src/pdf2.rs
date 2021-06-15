@@ -1,10 +1,9 @@
 use pdf_canvas::graphicsstate::Color;
-use pdf_canvas::{BuiltinFont, Canvas, FontSource, Pdf};
-use std::{fs::File, io::Write};
+use pdf_canvas::{Canvas, Pdf};
 
 use pmdraw::{
     drawing::Drawing,
-    shapes::{bezier::Bezier, circle::Circle, line::Line, point::Point, Shape},
+    shapes::{bezier::Bezier, line::Line, point::Point, Shape},
 };
 
 // width in pdf point
@@ -24,7 +23,7 @@ pub fn pdf2(
 ) -> () {
     let mut file_path = String::from("clothes/out/");
     file_path.push_str(file_name);
-    let mut document = Pdf::create(file_name).expect("Create pdf file");
+    let mut document = Pdf::create(&file_path).expect("Create pdf file");
 
     let paper_width = match paper_width {
         Some(custom_width) => to_pt(custom_width / 10.0),
@@ -90,12 +89,14 @@ fn draw_bezier(canvas: &mut Canvas, b: Bezier, offset_x: f32, offset_y: f32) {
 fn draw_line(canvas: &mut Canvas, mut l: Line, offset_x: f32, offset_y: f32) {
     l.origin = to_pt_point(l.origin).to(-offset_x as f64, -offset_y as f64);
     l.end = to_pt_point(l.end).to(-offset_x as f64, -offset_y as f64);
-    canvas.line(
-        l.origin.x as f32,
-        l.origin.y as f32,
-        l.end.x as f32,
-        l.end.y as f32,
-    );
+    canvas
+        .line(
+            l.origin.x as f32,
+            l.origin.y as f32,
+            l.end.x as f32,
+            l.end.y as f32,
+        )
+        .unwrap();
 }
 
 fn to_pt(centimeter: f64) -> f32 {

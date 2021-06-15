@@ -13,9 +13,42 @@ pub struct Bezier {
     points: Vec<Point>,
     /// [Optional] - set range (from, to) to represent patial bezier curve
     pub range: RangePoint,
+    t: Vec<f64>,
 }
 
 impl Bezier {
+    pub fn at_y(&self, y: f64) -> Point {
+        let tolerance = 0.1;
+        // initial guess
+        let mut t = 0.5;
+        loop {
+            // derivative at guess t
+            let dy_dt = self.derivative(t).y;
+            // update t by Newton's method
+            let y0 = self.point_at(t).y;
+            let t1 = match t + (y - y0) / dy_dt {
+                // set uppder bound and lowerbound to prevent diverge
+                t @ _ => {
+                    if t > 1.0 {
+                        1.0
+                    } else if t < 0.0 {
+                        0.0
+                    } else {
+                        t
+                    }
+                }
+            };
+            // validate new t
+            let p1 = self.point_at(t1);
+            let dif = y0 - p1.y;
+            if dif.abs() < tolerance && dif.abs() < tolerance {
+                return p1;
+            }
+            // if t is not precise enough, repeat the process against updated t
+            t = t1;
+        }
+    }
+
     /// derivative dB/dt = (dx/dt, dy/dt)
     pub fn derivative(&self, t: f64) -> Point {
         if t == 1.0 {
@@ -29,10 +62,23 @@ impl Bezier {
         self.points[self.points.len() - 1]
     }
 
+    /// just get line from this bezier's end to the origin of another
     pub fn join(&self, b: &Bezier) -> Line {
         self.range.to.line_to(b.range.from)
     }
 
+    /// concatenate two bezier curves by extending edges as lines
+    pub fn join_by_extending(&self, b: &Bezier) -> (Line, Line) {
+        let mut bezier_edge1 = self
+            .range
+            .to
+            .line_to(self.point_at(self.t_range().to + 0.01));
+        let mut bezier_edge2 = b.point_at(b.t_range().from - 0.01).line_to(b.range.from);
+        bezier_edge1.join(&mut bezier_edge2);
+        (bezier_edge1, bezier_edge2)
+    }
+
+    /// concatenate with a line by extending both of them
     pub fn join_line(&mut self, l: &mut Line) -> Line {
         let mut bezier_edge = self
             .range
@@ -40,6 +86,19 @@ impl Bezier {
             .line_to(self.point_at(self.t_range().to + 0.01));
         l.join(&mut bezier_edge);
         bezier_edge
+    }
+
+    pub fn mirror(&self, mirror_line: Line) -> Bezier {
+        let mut mirrored_fit_points = Vec::new();
+        for p in &self.fit_points {
+            mirrored_fit_points.push(p.mirror(mirror_line))
+        }
+        let mut mirrored_b = Bezier::new_with_t(&mirrored_fit_points, &self.t);
+        let (from, to) = self.get_range_index();
+        mirrored_b.range.from = mirrored_fit_points[from];
+        mirrored_b.range.to = mirrored_fit_points[to];
+        mirrored_b.reverse();
+        mirrored_b
     }
 
     /// fit points
@@ -54,12 +113,12 @@ impl Bezier {
                 }
             })
             .collect::<Vec<f64>>();
-        Bezier::new_with_t(fit_points, t_parameters)
+        Bezier::new_with_t(&fit_points, &t_parameters)
     }
 
     /// fit points and parameter values of each point
 
-    pub fn new_with_t(fit_points: Vec<Point>, t: Vec<f64>) -> Bezier {
+    pub fn new_with_t(fit_points: &Vec<Point>, t: &Vec<f64>) -> Bezier {
         let count_points = fit_points.len();
 
         // set origin and end
@@ -70,17 +129,18 @@ impl Bezier {
         points[count_points - 1] = end;
 
         // set ctrl points
-        let ctrl_points = solve_ctrl_points(&fit_points, t);
+        let ctrl_points = solve_ctrl_points(fit_points, t);
         for i in 0..count_points - 2 {
             points[i + 1] = ctrl_points[i];
         }
         Bezier {
-            fit_points,
+            fit_points: fit_points.clone(),
             points,
             range: RangePoint {
                 from: origin,
                 to: end,
             },
+            t: t.clone(),
         }
     }
 
@@ -106,18 +166,29 @@ impl Bezier {
         )
     }
 
+    pub fn reverse(&mut self) -> () {
+        self.fit_points.reverse();
+        self.points.reverse();
+        self.t = self.t.iter().map(|each_t| 1.0 - each_t).collect();
+        self.t.reverse();
+        let from = self.range.from.clone();
+        self.range.from = self.range.to;
+        self.range.to = from;
+    }
+
     pub fn set_range(&mut self, from: Point, to: Point) {
         self.range = RangePoint { from, to };
     }
 
     /// Solve parameter t of point p when p is somewhere on the curve by Newton's method
     pub fn solve_t_at(&self, p: Point) -> f64 {
-        if p == self.origin() {
-            return 0.0;
+        // if p is one of fit points, t is known
+        for i in 0..self.fit_points.len() {
+            if p == self.fit_points[i] {
+                return self.t[i];
+            }
         }
-        if p == self.end() {
-            return 1.0;
-        }
+        // otherwise, calculate t
         let tolerance = 0.1;
         let (mut learning_rate_x, mut learning_rate_y) = (1.0, 1.0);
         // initial guess
@@ -185,23 +256,23 @@ impl Bezier {
     pub fn parallel(&self, distance: f64) -> Parallel {
         let make_parallel = |is_left: bool| {
             let mut fit_poitns = Vec::new();
-            let mut range = self.range.clone();
             for i in 0..self.points.len() {
-                let p = self.fit_points[i];
-                let p_next = self.point_at(self.solve_t_at(self.fit_points[i]) + 0.01);
+                let mut p = self.fit_points[i];
+                let mut p_next = self.point_at(self.solve_t_at(self.fit_points[i]) + 0.01);
+                // t is defined in [0, 1], hence modify points to make sure they are inside the interval
+                if i == self.points.len() - 1 {
+                    p_next = p;
+                    p = self.point_at(0.99);
+                }
                 let mut parallel_point = p_next.clone();
                 parallel_point.rotate(if is_left { 90.0 } else { -90.0 }, p);
                 parallel_point = p.to_point(parallel_point, distance);
                 fit_poitns.push(parallel_point);
-                if p == self.range.from {
-                    range.from = parallel_point
-                }
-                if p == self.range.to {
-                    range.to = parallel_point
-                }
             }
-            let mut parallel_bezier = Bezier::new(fit_poitns);
-            parallel_bezier.range = range;
+            let mut parallel_bezier = Bezier::new_with_t(&fit_poitns, &self.t);
+            let (from, to) = self.get_range_index();
+            parallel_bezier.range.from = fit_poitns[from];
+            parallel_bezier.range.to = fit_poitns[to];
             parallel_bezier
         };
         Parallel {
@@ -211,8 +282,6 @@ impl Bezier {
     }
 
     /// refit bezier curve with new fit_points
-    ///
-    /// range is reset uness explicity set
     pub fn refit<T>(
         &mut self,
         mut modify: T,
@@ -254,6 +323,21 @@ impl Bezier {
         self.range.from = self.range.from.to(dx, dy);
         self.range.to = self.range.to.to(dx, dy);
     }
+
+    pub fn get_range_index(&self) -> (usize, usize) {
+        let mut from = 0;
+        let mut to = 1;
+        for i in 0..self.points.len() {
+            let p = self.fit_points[i];
+            if p == self.range.from {
+                from = i
+            }
+            if p == self.range.to {
+                to = i
+            }
+        }
+        (from, to)
+    }
 }
 
 impl Clone for Bezier {
@@ -262,6 +346,7 @@ impl Clone for Bezier {
             fit_points: self.fit_points.clone(),
             points: self.points.clone(),
             range: self.range,
+            t: self.t.clone(),
         }
     }
 }
@@ -293,7 +378,7 @@ impl Clone for Bezier {
 ///all the elements of the vector b,
 ///and control points are solved by a linear equasion A c = b
 ///thus,  c = A^-1 * b; */
-fn solve_ctrl_points(points: &Vec<Point>, t: Vec<f64>) -> Vec<Point> {
+fn solve_ctrl_points(points: &Vec<Point>, t: &Vec<f64>) -> Vec<Point> {
     // number of points (p0, ..., pn-1)
     let n = points.len();
 

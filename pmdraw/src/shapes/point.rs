@@ -38,6 +38,18 @@ impl Point {
         self.between(another, 0.5)
     }
 
+    pub fn mirror(&self, mirror_line: Line) -> Point {
+        let l_vec = mirror_line.vec();
+        let vertical_direction = Point::new(-l_vec.y, l_vec.x);
+        let vertical_line = self.line_to(self + vertical_direction);
+        let vertical_point_on_the_mirror = mirror_line.intersection(&&vertical_line);
+        if self == &vertical_point_on_the_mirror {
+            vertical_point_on_the_mirror
+        } else {
+            (self.line_to(vertical_point_on_the_mirror) * 2.0).end
+        }
+    }
+
     pub fn new(x: f64, y: f64) -> Point {
         Point { x, y, z: 0.0 }
     }
@@ -62,12 +74,12 @@ impl Point {
     }
 
     pub fn rotate_around_any_axis(&mut self, angle_degree: f64, origin: Point, axis: Axis) -> () {
-        // relative to origin
-        let mut p = self.clone() - origin;
-        let (x, y, z) = (p.x, p.y, p.z);
         let theta = PI / 180.0 * angle_degree;
         let sin = theta.sin();
         let cos = theta.cos();
+        // relative to origin
+        let mut p = self.clone() - origin;
+        let (x, y, z) = (p.x, p.y, p.z);
         p = match axis {
             Axis::X => {
                 p.y = cos * y - sin * z;

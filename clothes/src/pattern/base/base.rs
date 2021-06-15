@@ -1,4 +1,3 @@
-use std::f64::consts::PI;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -74,7 +73,7 @@ impl Base {
     /// - m measurements of body
     /// - amount of dart - typically from 4 to 15 cm
     #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
-    pub fn new(m: Measurements, dart: Cm) -> Base {
+    pub fn new(m: &Measurements, dart: Cm) -> Base {
         Base::assert_measurements(&m);
         let waist = m.waist / 2.0 + 2.0 + dart;
         let neck_depth = m.neck_size / 5.0 - 0.5;
@@ -130,7 +129,7 @@ impl Base {
             center_back.end,
             Point::new(
                 back_neck_end.between(center_back.end, 0.333).x,
-                center_back.end.y + 0.5,
+                center_back.end.y + 0.85,
             ),
             back_neck_end,
         ]);

@@ -1,5 +1,6 @@
 use super::{bezier::Bezier, point::Point};
 use pmmath::matrix::Mat;
+use std::{f64::consts::PI, ops};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -12,6 +13,13 @@ pub struct Line {
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Line {
+    /// get angle in degree
+    pub fn angle(&self) -> f64 {
+        let vec = self.vec();
+        let slope = vec.y / vec.x;
+        slope.atan() / PI * 180.0
+    }
+
     /// Get the point on the line by x
     pub fn at_x(&self, x: f64) -> Point {
         let t = (x - self.origin.x) / (self.end.x - self.origin.x);
@@ -103,31 +111,17 @@ impl Line {
         self.origin.middle(self.end)
     }
 
-    pub fn new(origin: Point, end: Point) -> Line {
-        Line { origin, end }
+    pub fn mirror(&self, mirror_line: Line) -> Line {
+        let mut mirrored_l = self
+            .origin
+            .mirror(mirror_line)
+            .line_to(self.end.mirror(mirror_line));
+        mirrored_l.reverse();
+        mirrored_l
     }
 
-    fn is_parallel(&self, l: &Line) -> bool {
-        let slope = |l: &Line| {
-            let vec = l.end - l.origin;
-            if vec.x == 0.0 {
-                None
-            } else {
-                Some(vec.y / vec.x)
-            }
-        };
-        let slope1 = slope(self);
-        let slope2 = slope(l);
-        match slope1 {
-            Some(m1) => match slope2 {
-                Some(m2) => m1 == m2,
-                None => false,
-            },
-            None => match slope2 {
-                Some(_) => false,
-                None => true,
-            },
-        }
+    pub fn new(origin: Point, end: Point) -> Line {
+        Line { origin, end }
     }
 
     /// Length of line
@@ -157,6 +151,12 @@ impl Line {
     /// Get a point on this line by specifying distance from the line's origin
     pub fn point_from_origin(&self, length: f64) -> Point {
         self.origin.to_point(self.end, length)
+    }
+
+    pub fn reverse(&mut self) -> () {
+        let origin = self.origin.clone();
+        self.origin = self.end.clone();
+        self.end = origin;
     }
 
     /// Rotate around point
@@ -196,3 +196,7 @@ pub struct Parallel {
     pub left: Line,
     pub right: Line,
 }
+
+impl_op_ex_commutative!(*|scalar: f64, l: &Line| -> Line {
+    l.origin.line_to(l.point_from_origin(l.len() * scalar))
+});

@@ -72,10 +72,20 @@ impl Drawing {
     pub fn line(&mut self, l: Line) {
         self.line_with_store(l, true);
     }
+    pub fn line_borrow(&mut self, l: &Line) {
+        self.line_with_store_borrow(l, true);
+    }
     fn line_no_store(&mut self, l: Line) {
         self.line_with_store(l, false);
     }
     fn line_with_store(&mut self, l: Line, stores_shape: bool) {
+        if stores_shape {
+            self.shapes.push(Shape::Line(l.clone()));
+        }
+        self.vertices.push((l.origin.x as f32, l.origin.y as f32));
+        self.vertices.push((l.end.x as f32, l.end.y as f32));
+    }
+    fn line_with_store_borrow(&mut self, l: &Line, stores_shape: bool) {
         if stores_shape {
             self.shapes.push(Shape::Line(l.clone()));
         }

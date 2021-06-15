@@ -9,6 +9,10 @@ pub struct Dart {
 }
 
 impl Dart {
+    pub fn middle(&self) -> Point {
+        self.fst.end
+    }
+
     /// Create dart from 3 points
     /// - fst - first line's edge point
     /// - snd - second line's edge point
@@ -24,5 +28,9 @@ impl Dart {
     pub fn to(&mut self, dx: Cm, dy: Cm) {
         self.fst.to(dx, dy);
         self.snd.to(dx, dy);
+    }
+
+    pub fn width(&self) -> Cm {
+        self.fst.origin.distance(self.snd.end)
     }
 }
