@@ -21,8 +21,12 @@ impl PoloShirt {
             waist_margin,
         );
         let mut polo = PoloShirt { shirt };
-        polo.shirt.collar.pattern.to(0.0, 78.0);
-        polo.shirt.sleeve.pattern.to(0.0, 85.0);
+        polo.shirt.body.patterns[0].to(1.0, 6.0);
+        polo.shirt.body.patterns[1].to(2.0, 6.0);
+        polo.shirt.body.patterns[2].to(1.0, 5.0);
+        polo.shirt.body.patterns[3].to(1.0, 5.0);
+        polo.shirt.collar.pattern.to(5.0, 87.0);
+        polo.shirt.sleeve.pattern.to(5.0, 89.0);
         polo
     }
 }

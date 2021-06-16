@@ -88,6 +88,26 @@ impl Bezier {
         bezier_edge
     }
 
+    pub fn len(&self) -> f64 {
+        let mut length = 0.0;
+        let t_range = self.t_range();
+        let mut t = t_range.from;
+        let dt = 0.01;
+        loop {
+            let p0 = self.point_at(t);
+            let mut t1 = t + dt;
+            if t1 >= t_range.to {
+                t1 = t_range.to
+            }
+            let p1 = self.point_at(t1);
+            length += p0.distance(p1);
+            if t1 == t_range.to {
+                return length;
+            }
+            t = t1
+        }
+    }
+
     pub fn mirror(&self, mirror_line: Line) -> Bezier {
         let mut mirrored_fit_points = Vec::new();
         for p in &self.fit_points {

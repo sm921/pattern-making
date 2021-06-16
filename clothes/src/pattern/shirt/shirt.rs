@@ -1,4 +1,5 @@
 use pmdraw::drawing::Drawing;
+use pmfile::pdf2::pdf2;
 
 use crate::pattern::{
     base::base::Base,
@@ -29,15 +30,13 @@ impl Shirt {
     ) -> Shirt {
         let base = Base::new(m, waist_margin);
         let body = Body::new(m, base, body_type, waist_margin);
-        // todo calculate actual length from front's placket
-        let placket_width = 6.0;
-        // todo front.neck_hole + back.neck_hole
-        let neck_hole = 21.7;
-        let collar = Collar::new(collar_type, neck_hole, placket_width);
-        // todo calculate actual length from front and base
-        let front_arm_hole = 21.0;
-        let back_arm_hole = 20.0;
-        let sleeve = Sleeve::new(sleeve_type, m.sleeve_len, front_arm_hole, back_arm_hole);
+        let collar = Collar::new(collar_type, body.neck, body.placket_width);
+        let sleeve = Sleeve::new(
+            sleeve_type,
+            m.sleeve_len,
+            body.front_arm_hole,
+            body.back_arm_hole,
+        );
         Shirt {
             body,
             collar,
@@ -45,13 +44,21 @@ impl Shirt {
         }
     }
 
-    pub fn show(&self) {
-        let mut drawing = Drawing::new(90.0, 150.0);
+    pub fn draw(&self, width: Cm, height: Cm) -> Drawing {
+        let mut drawing = Drawing::new(width, height);
         for pattern in &self.body.patterns {
             pattern.draw(&mut drawing)
         }
         self.collar.pattern.draw(&mut drawing);
         self.sleeve.pattern.draw(&mut drawing);
-        drawing.show(900, 900);
+        drawing
+    }
+
+    pub fn export_to_pdf(&self, file_name: &str, width: Cm, height: Cm) {
+        pdf2(file_name, &self.draw(width, height), None, None);
+    }
+
+    pub fn show(&self, width: Cm, height: Cm) {
+        self.draw(width, height).show(900, 900);
     }
 }

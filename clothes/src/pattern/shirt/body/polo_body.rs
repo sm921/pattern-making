@@ -9,6 +9,9 @@ use crate::pattern::{
 pub struct PoloBody {
     pub placket_width: Cm,
     pub patterns: Vec<Pattern>,
+    pub neck: Cm,
+    pub front_arm_hole: Cm,
+    pub back_arm_hole: Cm,
 }
 
 impl PoloBody {
@@ -24,17 +27,17 @@ impl PoloBody {
         let arm_hole_origin = f_base.arm_hole.0.range.from.to(0.0, -3.0);
         let side = Bezier::new(vec![bottom.end, waist.end, arm_hole_origin]);
         let arm_hole_end = f_base.shoulder.parallel(1.0).right.point_from_origin(-2.5);
-        let arm_hole = Bezier::new(vec![
+        let front_arm_hole = Bezier::new(vec![
             arm_hole_origin,
             f_base.arm_hole.0.point_at(0.9),
             arm_hole_end,
         ]);
         let shoulder = arm_hole_end.line_to(f_base.shoulder.point_from_end(-0.8));
-        let mut neck = f_base.neck.clone();
-        let neck_end = neck.end().to(0.0, -1.0);
-        let neck_end_index = neck.get_range_index().1;
+        let mut front_neck = f_base.neck.clone();
+        let neck_end = front_neck.end().to(0.0, -1.0);
+        let neck_end_index = front_neck.get_range_index().1;
         let center = neck_end.line_to(bottom.origin);
-        neck.refit(
+        front_neck.refit(
             |fit_points| {
                 fit_points[0] = shoulder.end;
                 fit_points[neck_end_index] = neck_end;
@@ -51,9 +54,9 @@ impl PoloBody {
         let button1 = placket_end_mark.parallel(placket_length * 0.72).left;
         front.add_line(bottom);
         front.add_curve(side);
-        front.add_curve(arm_hole);
+        front.add_curve(front_arm_hole.clone());
         front.add_line(shoulder);
-        front.add_curve(neck);
+        front.add_curve(front_neck.clone());
         front.add_line(center);
         front.generate_margin_diffrent_values(vec![1.0, 1.0, 0.5, 1.0, 0.5, 0.0]);
         front.add_line(placket_end_mark);
@@ -101,7 +104,7 @@ impl PoloBody {
         b_base.waist.origin = b_base.waist.point_from_origin(1.0);
         let bottom = b_base.waist.parallel(measurements.waist_to_hip).right;
         let center = bottom.end.line_to(b_base.center.end);
-        let neck = b_base.neck.clone();
+        let back_neck = b_base.neck.clone();
         let mut shoulder = b_base.shoulder;
         shoulder.end.rotate(
             -b_base.shoulder_dart.fst.angle() + b_base.shoulder_dart.snd.angle(),
@@ -109,9 +112,9 @@ impl PoloBody {
         );
         shoulder.extend_end(2.5);
         let arm_hole_end = b_base.arm_hole.range.to.to(0.0, -3.0);
-        let mut arm_hole = b_base.arm_hole.clone();
-        let arm_hole_end_index = arm_hole.get_range_index().1;
-        arm_hole.refit(
+        let mut back_arm_hole = b_base.arm_hole.clone();
+        let arm_hole_end_index = back_arm_hole.get_range_index().1;
+        back_arm_hole.refit(
             |fit_points| {
                 fit_points[0] = shoulder.end;
                 fit_points[arm_hole_end_index] = arm_hole_end;
@@ -123,15 +126,18 @@ impl PoloBody {
         let side = Bezier::new(vec![arm_hole_end, b_base.waist.origin, bottom.origin]);
         back.add_line(bottom);
         back.add_line(center);
-        back.add_curve(neck);
+        back.add_curve(back_neck.clone());
         back.add_line(shoulder);
-        back.add_curve(arm_hole);
+        back.add_curve(back_arm_hole.clone());
         back.add_curve(side);
         back.generate_margin_diffrent_values(vec![1.0, 0.0, 0.5, 1.0, 0.5, 1.0]);
         back.to(6.0, measurements.waist_to_hip);
         PoloBody {
             patterns: vec![front, back, placket, placket2],
             placket_width,
+            neck: front_neck.len() + back_neck.len(),
+            front_arm_hole: front_arm_hole.len(),
+            back_arm_hole: back_arm_hole.len(),
         }
     }
 }

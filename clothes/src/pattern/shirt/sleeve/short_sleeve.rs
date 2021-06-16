@@ -12,8 +12,8 @@ impl ShortSleeve {
     /// - arm_hole_length - length of arm_hole of front and back
     pub fn new(sleeve_length: Cm, front_arm_hole: Cm, back_arm_hole: Cm) -> ShortSleeve {
         let mut pattern = Pattern::new();
-        // let short sleeve length be 41.6 % of arm length (shoulder to wrist)
-        let sleeve_len = sleeve_length * 0.416;
+        // let short sleeve length be 42.37 % of arm length (shoulder to wrist)
+        let sleeve_len = sleeve_length * 0.4237;
         let top_left = Point::new(0.0, 0.0);
         let arm_hole = front_arm_hole + back_arm_hole;
         let top_height = arm_hole / 6.0;

@@ -1,7 +1,7 @@
 use pmdraw::drawing::Drawing;
 use pmfile::{pdf::pdf, pdf2::pdf2};
 
-use crate::pattern::base::base::Base;
+use crate::pattern::{base::base::Base, shirt::shirt::Shirt};
 
 /// margin of the screen
 const DRAWING_MARGIN: f64 = 9.0;

@@ -23,5 +23,6 @@ fn main() {
         waist_margin,
         clothes::pattern::shirt::collar::collar::CollarType::Stand,
     );
-    polo_shirt.shirt.show();
+    polo_shirt.shirt.export_to_pdf("polo.pdf", 70.0, 140.0);
+    polo_shirt.shirt.show(70.0, 140.0);
 }
