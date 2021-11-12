@@ -15,6 +15,8 @@
 - cross platform
 - save drawings as dxf files (Drawing Exchange Format. the most common file format for CAD applications)
 - matrix and vector calculations
+- print as PDF
+  ![printed-pattern](image/printed-pattern.jpg)
 
 ## Pros
 
